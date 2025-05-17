@@ -1,12 +1,13 @@
 :- dynamic(init/1).         
 :- dynamic(player/7).
+:- dynamic(turn/1).
 
 :- include('ascii.pl').
 :- include('variable.pl').
 :- include('player.pl').
 
 start:- init(_), write('Game already started'),!.
-start:- \+init(_), assertz(player(ash, 0, 0, 0, 0, 0, 0)), title, created_by, startgame(0).
+start:- \+init(_), asserta(turn(20)), assertz(player(ash, 0, 0, 0, 0, 0, 0)), title, created_by, startgame(9).
 
 update_name(NewName):- player(_, Poke1, Poke2, Poke3, Poke4, X_pos, Y_pos),
     retract(player(_, Poke1, Poke2, Poke3, Poke4, X_pos, Y_pos)),
@@ -38,3 +39,4 @@ set_name:- red, nl, nl, write('|    First, what is your name?'), nl, read(X), nl
     write('|    Right! So your name is '), print_name, write('!'), nl.
 
 starter_pokemon:- write('|    Choose your starter POKeMON. '), print_name, write('!'), nl, chooseStarter.
+

@@ -3,12 +3,13 @@
 :- dynamic(jml_inventory/1).
 :- dynamic(playerPos/2).
 :- dynamic(base_stats/4).
+:- dynamic(poke_stats/5).
 :- dynamic(posisiPokemon/3).
 :- dynamic(battleNow/1).
 :- dynamic(curr_health/2).
 :- dynamic(isOnPoke/1).
 :- dynamic(isBattle/1).
-:- dynamic(level/2).
+:- dynamic(level/4).
 :- dynamic(skill/5).
 :- dynamic(health/2).
 
@@ -60,6 +61,15 @@ base_stats(35, 15, 10, charmeleon).
 base_stats(40, 12, 15, wartortle).
 base_stats( 250, 300, 250, wartortle).
 
+/* level Pokemon */
+/* level(Level, Nama_pokemon, Slot_Inventory, EXP_Counter) */
+level(5,pidgey,0, 0).
+level(5,charmander,0, 0).
+level(5,squirtle,0, 0).
+
+/* Poke stats */
+/* poke_stats(HP, ATK, DEF, Nama_pokemon, Slot_Inventory) */
+
 /* modifier */
 /* superEffective(T1,T2) : T1 is super effective against T2 */
 /* notEffective(T1,T2) : T1 is not too effective against T2*/
@@ -89,7 +99,7 @@ notEffective(ice, water).
 notEffective(ice, ice).
 notEffective(normal, rock).
 
-/* special attack */
+/* Skill */
 /* skill(Nama_skill, Type, Power, Ability, Ability_chance) */
 skill(tackle, normal, 35, none, 0).
 skill(scratch, normal, 35, none, 0).
@@ -109,3 +119,10 @@ skill(mind_shock, psychic, 300, area).
 
 isOnPoke(0).
 isBattle(0).
+
+/* Rarity */
+/* rarity(Rarity, BaseEXP, BaseEXPGiven, CatchRate) */
+rarity(common, 20, 10, 40).
+rarity(rare, 30, 20, 30).
+rarity(epic, 40, 30, 25).
+rarity(legendary, 50, 40, 20).
