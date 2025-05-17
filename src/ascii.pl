@@ -1,3 +1,5 @@
+/* Ascii art file */
+
 oak:- 
     write('           .+=+*+**=                          '), nl,
     write('          :*= :-.     +.                      '), nl,
