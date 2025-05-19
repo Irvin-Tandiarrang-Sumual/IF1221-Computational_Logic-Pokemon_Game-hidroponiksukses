@@ -45,7 +45,7 @@ step(6) :- write('|    Others use them for fights.').
 step(7) :- write('|    Myself...').
 step(8) :- write('|    I study POKeMON as a profession.').
 step(9) :- set_name, wait_enter. 
-step(10) :- starter_pokemon, generate_matrix(17, _).
+step(10) :- starter_pokemon, init_map(17,32).
 
 /* wait_enter: press ENTER to continue */
 wait_enter :- get_char(_), nl.
