@@ -10,6 +10,7 @@
 :- include('ascii.pl').
 :- include('variable.pl').
 :- include('player.pl').
+:- include('help.pl').
 
 /* kondisi: gamestarted */
 start:- init, write('Game already started'),!.
