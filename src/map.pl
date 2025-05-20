@@ -4,7 +4,7 @@
 :- dynamic(pokemap/1).
 
 /* Initiating map and poke map */
-init_map(N, X):- generate_matrix(N, _), bushes(X), add_pokes, place_random_p.
+init_map(N, X):- generate_matrix(N, _), bushes(X), add_pokes, place_random_p, place_random_h.
 
 /* mapping; Print map to console */
 mapping :-
@@ -203,3 +203,27 @@ random_member(X, List):-
     Length > 0,
     random(0, Length, Index),
     nth0(Index, List, X).
+
+/* Additional Rules for PokeCenter */
+random_pokecenter_pos((X, Y)) :-
+    map(Matrix),
+    findall((I, J), (nth0(I, Matrix, Row), nth0(J, Row, '0')), ZeroTiles), random_member((X, Y), ZeroTiles).
+
+place_random_h :-
+    random_pokecenter_pos((X, Y)),
+    map(Matrix),
+    replace_in_matrix(Matrix, (X, Y), 'H', NewMatrix),
+    retractall(map(_)),
+    assertz(map(NewMatrix)).
+
+pcenter :- pcenter_step(X).
+
+pcenter_step(X) :-
+    p_step(X),
+    wait_enter,
+    X1 is X + 1,
+    (X1 =< 2 -> pcenter_step(X1); true).
+
+p_step(0) :- pcenter_ascii.
+p_step(1) :- nursejoy_ascii.
+p_step(2) :- nursejoy_w_ascii.
