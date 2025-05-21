@@ -6,19 +6,30 @@
 /* (HP, ATK, DEF, Nama, ID) */
 :- dynamic(statusKita/5).
 :- dynamic(statusLawan/5).
-/*
+/* Status Defend */
+/* (defendKita, defendLawan) */
+:- dynamic(defendStatus/2)
 
 /* Randomizer Pokemon Lawan */
 buat_lawan :-
-    random(0, )
+    random(3, 15) is X,
 
-/* Main Battle */
+
+/* Initiation Battle */
 battle :-
     assertz(situation('ongoing')),
-    damage_skill
+    buat_lawan,
+    turn,
+
+turn :-
+    (myTurn -> statusKita(HP, _, _, Name, ID); statusLawan(HP, _, _, Name, ID)),
+    cekBattleStatus(Name, HP)
+    (myTurn -> retract(myTurn); assertz(myTurn)),
+
 
 /* Attack */
 attack :-
+    myTurn,
 
 
 /* Defend */
@@ -28,16 +39,27 @@ defend :-
     NewDEF is (1.3 * DEF),
     retract(statuskita(HP, ATK, DEF, Name, ID)),
     assertz(statuskita(HP, ATK, NewDEF, Name, ID)),
+    retract(defendStatus(_, StatDefLawan)),
+    assertz(2, StatDefLawan),
     write(Name), write(' dalam posisi bertahan! Defense naik untuk 1 turn.'), nl, nl,
     cekBattleStatus(Name, HP).
-
-/* Switch */
-switch(IdxDeck, IdxTas) :-
-
+defend :-
+    \+ myTurn,
+    statusLawan(_, _, DEF, Name, _),
+    NewDEF is (1.3 * DEF),
+    retract(statusLawan(HP, ATK, DEF, Name, ID)),
+    assertz(statusLawan(HP, ATK, NewDEF, Name, ID)),
+    retract(defendStatus(StatDefKita, _)),
+    assertz(StatDefKita, 2),
+    write(Name), write(' dalam posisi bertahan! Defense naik untuk 1 turn.'), nl, nl,
+    cekBattleStatus(Name, HP).
+defend :-
+    turn.
 
 /* Skill Turn */
 skill(Input_Skill) :-
-    
+
+    (myTurn -> damage_skill())
 
 
 /* Damage Skill */
