@@ -59,7 +59,7 @@ base_stats(35, 15, 10, charmander).
 base_stats(40, 12, 15, squirtle).
 base_stats(35, 15, 10, charmeleon).
 base_stats(40, 12, 15, wartortle).
-base_stats( 250, 300, 250, wartortle).
+base_stats(250, 300, 250, wartortle).
 
 /* level Pokemon */
 /* level(Level, Nama_pokemon, Slot_Inventory, EXP_Counter) */
