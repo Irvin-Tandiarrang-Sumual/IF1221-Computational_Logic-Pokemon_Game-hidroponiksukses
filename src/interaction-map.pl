@@ -64,5 +64,5 @@ moveRight :- move(0,2), mapping.
 
 /* Currently: Replace the old tile with 0 */
 update_player_map(Matrix, (OldX, OldY), NewX, NewY, NewMatrix) :-
-    replace_in_matrix(Matrix, (OldX, OldY), '0', TempMatrix),
+    replace_in_matrix(Matrix, (OldX, OldY), ' ', TempMatrix),
     replace_in_matrix(TempMatrix, (NewX, NewY), 'P', NewMatrix).

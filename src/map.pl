@@ -22,7 +22,7 @@ print_matrix_rows([Row|T], I) :-
 print_row([], _, _).
 print_row([H|T], RowIdx, ColIdx) :-
     /* Print C if there is common and not a bush */
-    (poke_map(PokeList), member((common, (RowIdx, ColIdx)), PokeList), H == '0' -> write('C'); write(H)),
+    (pokemap(PokeList), member((common, (RowIdx, ColIdx)), PokeList), H == ' ' -> write('C'); write(H)),
     write(' '),
     C1 is ColIdx + 1,
     print_row(T, RowIdx, C1).
@@ -69,7 +69,7 @@ tile(N, ['|'|T]) :-
     tile_zero(N1, T).
 
 tile_zero(0, []).
-tile_zero(N, ['0'|T]) :-
+tile_zero(N, [' '|T]) :-
     N > 0,
     N1 is N - 1,
     tile(N1, T).
@@ -88,7 +88,7 @@ shuffle(List, [Elem|Shuffled]) :-
 bushes(N) :-
     map(Matrix),
     /* findall with 0 (tile) */
-    findall((X,Y), (nth0(X, Matrix, Row), nth0(Y, Row, '0')), Count0),
+    findall((X,Y), (nth0(X, Matrix, Row), nth0(Y, Row, ' ')), Count0),
     length(Count0, Max0),
     MinN is min(N, Max0),
     shuffle(Count0, Shuffled),
@@ -135,7 +135,7 @@ take(N, List, Taken, Rest) :-
     append(Taken, Rest, List).
 
 print_pokes :-
-    poke_map(Pokes),
+    pokemap(Pokes),
     forall(member((Type, (X,Y)), Pokes), (format("~w at (~d,~d)~n", [Type, X, Y]))).
 
 map_pokes(_, [], []).
@@ -152,7 +152,7 @@ exclude_positions([H|T], Exclude, [H|R]) :-
 add_pokes :-
     map(Matrix),
     findall((X,Y), (nth0(X, Matrix, Row), nth0(Y, Row, Tile), Tile = '#'), HashPositions),
-    findall((X,Y), (nth0(X, Matrix, Row), nth0(Y, Row, Tile), (Tile = '0'; Tile = '#')), CommonCandidates),
+    findall((X,Y), (nth0(X, Matrix, Row), nth0(Y, Row, Tile), (Tile = ' '; Tile = '#')), CommonCandidates),
     shuffle(HashPositions, ShuffledHash),
     take(1, ShuffledHash, LegendaryPos, Tail1),
     take(3, Tail1, EpicPos, Tail2),
@@ -173,19 +173,19 @@ add_pokes :-
     replace_common_positions(TempMatrix, CommonPos, NewMatrix),
     retractall(map(_)),
     assertz(map(NewMatrix)),
-    retractall(poke_map(_)),
-    assertz(poke_map(AllPokes)).
+    retractall(pokemap(_)),
+    assertz(pokemap(AllPokes)).
 
 replace_common_positions(Matrix, [], Matrix).
 replace_common_positions(Matrix, [(X,Y)|T], ResultMatrix) :-
     nth0(X, Matrix, Row),
     nth0(Y, Row, Tile),
-    ( Tile = '0' -> replace_positions(Matrix, [(X,Y)], TempMatrix, 'C');   TempMatrix = Matrix),
+    ( Tile = ' ' -> replace_positions(Matrix, [(X,Y)], TempMatrix, 'C');   TempMatrix = Matrix),
     replace_common_positions(TempMatrix, T, ResultMatrix).
 
 random_player_pos((X, Y)) :-
     map(Matrix),
-    findall((I, J), (nth0(I, Matrix, Row), nth0(J, Row, '0')), ZeroTiles), random_member((X, Y), ZeroTiles).
+    findall((I, J), (nth0(I, Matrix, Row), nth0(J, Row, ' ')), ZeroTiles), random_member((X, Y), ZeroTiles).
 
 place_random_p :-
     random_player_pos((X, Y)),
@@ -208,7 +208,7 @@ random_member(X, List):-
 /* Additional Rules for PokeCenter */
 random_pokecenter_pos((X, Y)) :-
     map(Matrix),
-    findall((I, J), (nth0(I, Matrix, Row), nth0(J, Row, '0')), ZeroTiles), random_member((X, Y), ZeroTiles).
+    findall((I, J), (nth0(I, Matrix, Row), nth0(J, Row, ' ')), ZeroTiles), random_member((X, Y), ZeroTiles).
 
 place_random_h :-
     random_pokecenter_pos((X, Y)),
