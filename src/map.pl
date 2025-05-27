@@ -1,5 +1,6 @@
 /* Visual map */
 :- dynamic(map/1).
+
 /* Pokemon location map */
 :- dynamic(pokemap/1).
 
@@ -227,3 +228,11 @@ pcenter_step(X) :-
 p_step(0) :- pcenter_ascii.
 p_step(1) :- nursejoy_ascii.
 p_step(2) :- nursejoy_w_ascii.
+
+/* Additional Information for Player and PokeCenter */
+print_info_p :-
+    map(Matrix),
+    findall((X,Y), (nth0(X, Matrix, Row), nth0(Y, Row, Tile), Tile = 'P'), PlayerPositions),
+    findall((I,J), (nth0(I, Matrix, Row), nth0(J, Row, Tile), Tile = 'H'), PcenterPositions),
+    forall(member((PX,PY), PlayerPositions), format("Player at (~d,~d)~n", [PX,PY])),
+    forall(member((HX,HY), PcenterPositions), format("PokeCenter at (~d,~d)~n", [HX,HY])).

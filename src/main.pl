@@ -3,10 +3,11 @@
 :- dynamic(init/0).
 /* player/7: (nama, pokemon 1, pokemon 2, pokemon 3, pokemon 4, X_pos, Y_pos) */
 :- dynamic(player/7).
-/* TODO */
-:- dynamic(turn/1).
+/* mengatur inisialisasi banyak putaran yang bisa dilakukan player */
+:- dynamic(init_moves/1).
 
 /* File lain */
+:- include('interaction-map.pl').
 :- include('ascii.pl').
 :- include('variable.pl').
 :- include('player.pl').
@@ -16,7 +17,7 @@
 /* kondisi: gamestarted */
 start:- init, write('Game already started'),!.
 /* kondisi: game not started */
-start:- \+init, assertz(init), asserta(turn(20)), assertz(player(ash, 0, 0, 0, 0, 0, 0)), title, created_by, startgame(0).
+start:- \+init, assertz(init), init_moves(20), assertz(player(ash, 0, 0, 0, 0, 0, 0)), title, created_by, startgame(0).
 
 /* update_name: input name and change the dynamic variable */
 update_name(NewName):- player(_, Poke1, Poke2, Poke3, Poke4, X_pos, Y_pos),
