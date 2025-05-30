@@ -16,16 +16,15 @@
 /* Pokemon */
 /* List pokemon */
 /* pokemon(ID, Nama_pokemon, Rarity) */
-pokemon(36, pidgey, common).
-pokemon(74, articuno, legendary).
-pokemon(84, pikachu, rare).
-pokemon(131, mewtwo, legendary).
-pokemon(132, snorlax, epic).
-pokemon(169, geodude, rare).
-pokemon(176, charmander, common).
-pokemon(177, squirtle, common).
-pokemon(178, charmeleon, common).
-pokemon(179, wartortle, common).
+pokemon(1, charmander, common).
+pokemon(2, squirtle, common).
+pokemon(3, pidgey, common).
+pokemon(4, charmeleon, common).
+pokemon(5, wartortle, common).
+pokemon(6, pikachu, rare).
+pokemon(7, geodude, rare).
+pokemon(8, snorlax, epic).
+pokemon(9, articuno, legendary).
 
 /* Type */
 /* type(Type, Nama_pokemon) */
@@ -40,9 +39,9 @@ type(fire, charmeleon).
 type(water, wartortle).
 type(psychic, mewtwo).
 
-starter(pidgey).
 starter(charmander).
 starter(squirtle).
+starter(pidgey).
 
 
 legendary(articuno).

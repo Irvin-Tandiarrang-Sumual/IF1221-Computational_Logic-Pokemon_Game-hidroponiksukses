@@ -17,17 +17,6 @@ random_between(Low, High, R) :-
     R0 is XInt mod Range,
     R is Low + R0.
 
-% Daftar pokemon dan rarity-nya
-poke(1, charmander, common).
-poke(2, squirtle, common).
-poke(3, pidgey, common).
-poke(4, charmeleon, common).
-poke(5, wartortle, common).
-poke(6, pikachu, rare).
-poke(7, geodude, rare).
-poke(8, snorlax, epic).
-poke(9, articuno, legendary).
-
 % pokeSkill(Nama, Skill1, Skill2)
 pokeSkill(charmander, scratch, ember).
 pokeSkill(squirtle, tackle, water_gun).
@@ -59,11 +48,15 @@ buat_lawan :-
     assertz(statusLawan(MaxHP, MaxHP, ATK, DEF, Nama, 99)),
 
     LevelDisplay is Level + 1,
+    pokemon(ID, Nama, _),
+    pokemon_ascii(ID),
     write('Kamu melawan '), write(Nama), write('.'), nl,
     write('Level: '), write(LevelDisplay), nl,
     write('HP: '), write(MaxHP), nl,
     write('ATK: '), write(ATK), nl,
-    write('DEF: '), write(DEF), nl,
+    write('DEF: '), write(DEF), nl, nl,
+    write('Pilih Pokemon mu dari party!'), nl,
+
 
     retractall(defendStatus(_, _)),
     assertz(defendStatus(1, 1)).
@@ -73,18 +66,18 @@ pokeRandomizer(Nama) :-
     random_between(1, 100, Roll),
     (
         Roll =< 60 ->
-            findall(N, poke(_, N, common), CommonList),
+            findall(N, pokemon(_, N, common), CommonList),
             random_member(Nama, CommonList)
     ;
         Roll =< 85 ->
-            findall(N, poke(_, N, rare), RareList),
+            findall(N, pokemon(_, N, rare), RareList),
             random_member(Nama, RareList)
     ;
         Roll =< 95 ->
-            findall(N, poke(_, N, epic), EpicList),
+            findall(N, pokemon(_, N, epic), EpicList),
             random_member(Nama, EpicList)
     ;
-        findall(N, poke(_, N, legendary), LegendaryList),
+        findall(N, pokemon(_, N, legendary), LegendaryList),
         random_member(Nama, LegendaryList)
     ).
 

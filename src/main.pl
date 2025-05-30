@@ -42,7 +42,7 @@ step(0) :- nl.
 step(1) :- oak, nl, nl, write('|    Hello there welcome to the World of POKeMON!').
 step(2) :- write('|    My name is OAK').
 step(3) :- write('|    People call me the POKeMON PROF!').
-step(4) :- pikachu, nl, nl, write('|    This world is inhabited by creatures called POKeMON!').
+step(4) :- pokemon_ascii(6), nl, nl, write('|    This world is inhabited by creatures called POKeMON!').
 step(5) :- write('|    For some people POKeMON are pets.').
 step(6) :- write('|    Others use them for fights.').
 step(7) :- write('|    Myself...').
