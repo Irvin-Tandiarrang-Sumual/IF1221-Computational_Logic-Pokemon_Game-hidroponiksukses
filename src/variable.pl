@@ -103,19 +103,18 @@ notEffective(normal, rock).
 /* skill(Nama_skill, Type, Power, Ability, Ability_chance) */
 skill(tackle, normal, 35, none, 0).
 skill(scratch, normal, 35, none, 0).
-skill(ember, fire, 40, burn3, 10).
+skill(ember, fire, 40, burn(2, 3), 1.0).
 skill(water_gun, water, 40, none, 0).
 skill(gust, flying, 30, none, 0).
-skill(fire_spin, fire, 35, burn5, 100).
-skill(bubble, water, 30, atk_down, 10).
-skill(thunder_shock, electric, 40, paralyze, 10).
-skill(quick_attack, normal, 30, atk_first, 100).
+skill(fire_spin, fire, 35, burn(2, 5), 1.0).
+skill(bubble, water, 30, lower_atk(3), 1.0).
+skill(thunder_shock, electric, 40, paralyze, 0.2).
+skill(quick_attack, normal, 30, none, 0).
 skill(rock_throw, rock, 50, none, 0).
-skill(rest, normal, 0, rest_heal, 100).
-skill(ice_shard, ice, 40, atk_first, 100).
-skill(psychic_blast, psychic, 200, confused, 20).
-skill(mind_shock, psychic, 300, area).
-
+skill(rest, normal, 0, heal(0.4), 1.0).
+skill(ice_shard, ice, 40, none, 0).
+skill(psychic_blast, psychic, 25, paralyze, 0.2).
+skill(mind_shock, psychic, 20, area, 1.0).
 
 isOnPoke(0).
 isBattle(0).
