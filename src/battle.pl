@@ -106,7 +106,8 @@ battle :-
     retractall(cooldown_kita(_, _)),
     retractall(cooldown_lawan(_, _)),
     assertz(cooldown_kita(0, 0)),
-    assertz(cooldown_lawan(0, 0)).
+    assertz(cooldown_lawan(0, 0)),
+    true.
 
 turn :-
     situation(ongoing), !,
@@ -118,13 +119,14 @@ turn :-
     ;
         statusLawan(CurHP, _, _, _, Name, _),
         cekBattleStatus(Name, CurHP),
-        enemy_action  % giliran lawan: lakukan aksi otomatis
+        enemy_action
     ),
-    toggle_turn.
-
+    toggle_turn,
+    true.
 
 turn :-
-    write('Battle sudah selesai.'), nl.
+    write('Battle sudah selesai.'), nl,
+    true.
 
 reset_defend :-
     ( myTurn ->
@@ -199,8 +201,6 @@ skill(SkillNumber) :-
         assertz(cooldown_kita(CD1, NewCD2))
     ),
     turn.
-
-
 
 damage_skill(SkillPower) :-
     integer(SkillPower) -> P = SkillPower ; P is round(SkillPower),
@@ -289,10 +289,17 @@ apply_ability(heal(Ratio), _) :-
 % Efek Turn
 % ----------------------
 
-apply_turn_effects(ID) :-
+apply_turn_effects :-
     reduce_cooldown,
-    apply_burn(ID),
-    apply_paralyze(ID).
+    ( myTurn ->
+        statusKita(_, _, _, _, _, ID),
+        apply_burn(ID),
+        apply_paralyze(ID)
+    ;
+        statusLawan(_, _, _, _, _, ID),
+        apply_burn(ID),
+        apply_paralyze(ID)
+    ).
 
 reduce_cooldown :-
     ( myTurn ->
@@ -309,9 +316,7 @@ reduce_cooldown :-
         assertz(cooldown_lawan(CD1N, CD2N))
     ).
 
-% ----------------------
 % Burn Effect
-% ----------------------
 apply_burn(ID) :-
     efek_pokemon(ID, burn(T, D)),
     status_pokemon(ID, CurHP, MaxHP, ATK, DEF, Nama),
@@ -324,9 +329,7 @@ apply_burn(ID) :-
     (T1 > 0 -> assertz(efek_pokemon(ID, burn(T1, D))) ; true), !.
 apply_burn(_).  % fallback bila tidak ada efek burn
 
-% ----------------------
 % Paralyze Effect
-% ----------------------
 apply_paralyze(ID) :-
     efek_pokemon(ID, paralyze),
     random_float(X),
