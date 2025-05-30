@@ -49,7 +49,7 @@ writeList([]) :- nl,!.
 /* Procedure */
 writeList([H|T]) :-
     pokemon(N, H, _),
-    starter_ascii(N),
+    pokemon_ascii(N),
     write('|    '),
     write(N),
     write('. '), write(H),nl,

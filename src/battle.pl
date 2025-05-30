@@ -17,17 +17,6 @@ random_between(Low, High, R) :-
     R0 is XInt mod Range,
     R is Low + R0.
 
-% Daftar pokemon dan rarity-nya
-poke(1, charmander, common).
-poke(2, squirtle, common).
-poke(3, pidgey, common).
-poke(4, charmeleon, common).
-poke(5, wartortle, common).
-poke(6, pikachu, rare).
-poke(7, geodude, rare).
-poke(8, snorlax, epic).
-poke(9, articuno, legendary).
-
 % pokeSkill(Nama, Skill1, Skill2)
 pokeSkill(charmander, scratch, ember).
 pokeSkill(squirtle, tackle, water_gun).
@@ -59,11 +48,15 @@ buat_lawan :-
     assertz(statusLawan(MaxHP, MaxHP, ATK, DEF, Nama, 99)),
 
     LevelDisplay is Level + 1,
+    pokemon(ID, Nama, _),
+    pokemon_ascii(ID),
     write('Kamu melawan '), write(Nama), write('.'), nl,
     write('Level: '), write(LevelDisplay), nl,
     write('HP: '), write(MaxHP), nl,
     write('ATK: '), write(ATK), nl,
-    write('DEF: '), write(DEF), nl,
+    write('DEF: '), write(DEF), nl, nl,
+    write('Pilih Pokemon mu dari party!'), nl,
+
 
     retractall(defendStatus(_, _)),
     assertz(defendStatus(1, 1)).
@@ -73,18 +66,18 @@ pokeRandomizer(Nama) :-
     random_between(1, 100, Roll),
     (
         Roll =< 60 ->
-            findall(N, poke(_, N, common), CommonList),
+            findall(N, pokemon(_, N, common), CommonList),
             random_member(Nama, CommonList)
     ;
         Roll =< 85 ->
-            findall(N, poke(_, N, rare), RareList),
+            findall(N, pokemon(_, N, rare), RareList),
             random_member(Nama, RareList)
     ;
         Roll =< 95 ->
-            findall(N, poke(_, N, epic), EpicList),
+            findall(N, pokemon(_, N, epic), EpicList),
             random_member(Nama, EpicList)
     ;
-        findall(N, poke(_, N, legendary), LegendaryList),
+        findall(N, pokemon(_, N, legendary), LegendaryList),
         random_member(Nama, LegendaryList)
     ).
 
@@ -106,7 +99,8 @@ battle :-
     retractall(cooldown_kita(_, _)),
     retractall(cooldown_lawan(_, _)),
     assertz(cooldown_kita(0, 0)),
-    assertz(cooldown_lawan(0, 0)).
+    assertz(cooldown_lawan(0, 0)),
+    true.
 
 turn :-
     situation(ongoing), !,
@@ -118,13 +112,14 @@ turn :-
     ;
         statusLawan(CurHP, _, _, _, Name, _),
         cekBattleStatus(Name, CurHP),
-        enemy_action  % giliran lawan: lakukan aksi otomatis
+        enemy_action
     ),
-    toggle_turn.
-
+    toggle_turn,
+    true.
 
 turn :-
-    write('Battle sudah selesai.'), nl.
+    write('Battle sudah selesai.'), nl,
+    true.
 
 reset_defend :-
     ( myTurn ->
@@ -199,8 +194,6 @@ skill(SkillNumber) :-
         assertz(cooldown_kita(CD1, NewCD2))
     ),
     turn.
-
-
 
 damage_skill(SkillPower) :-
     integer(SkillPower) -> P = SkillPower ; P is round(SkillPower),
@@ -289,10 +282,17 @@ apply_ability(heal(Ratio), _) :-
 % Efek Turn
 % ----------------------
 
-apply_turn_effects(ID) :-
+apply_turn_effects :-
     reduce_cooldown,
-    apply_burn(ID),
-    apply_paralyze(ID).
+    ( myTurn ->
+        statusKita(_, _, _, _, _, ID),
+        apply_burn(ID),
+        apply_paralyze(ID)
+    ;
+        statusLawan(_, _, _, _, _, ID),
+        apply_burn(ID),
+        apply_paralyze(ID)
+    ).
 
 reduce_cooldown :-
     ( myTurn ->
@@ -309,9 +309,7 @@ reduce_cooldown :-
         assertz(cooldown_lawan(CD1N, CD2N))
     ).
 
-% ----------------------
 % Burn Effect
-% ----------------------
 apply_burn(ID) :-
     efek_pokemon(ID, burn(T, D)),
     status_pokemon(ID, CurHP, MaxHP, ATK, DEF, Nama),
@@ -324,9 +322,7 @@ apply_burn(ID) :-
     (T1 > 0 -> assertz(efek_pokemon(ID, burn(T1, D))) ; true), !.
 apply_burn(_).  % fallback bila tidak ada efek burn
 
-% ----------------------
 % Paralyze Effect
-% ----------------------
 apply_paralyze(ID) :-
     efek_pokemon(ID, paralyze),
     random_float(X),
