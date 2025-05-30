@@ -14,6 +14,7 @@
 :- include('help.pl').
 :- include('map.pl').
 :- include('battle.pl').
+:- include('end-game.pl').
 
 /* kondisi: gamestarted */
 start:- init, write('Game already started'),!.

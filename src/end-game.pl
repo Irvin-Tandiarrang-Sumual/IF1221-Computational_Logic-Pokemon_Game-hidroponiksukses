@@ -1,9 +1,3 @@
-
-/* File lain */
-:- include('variable.pl').
-:- include('player.pl').
-:- include('battle.pl').
-
 /* Pembuka cerita di final stage */
 print_end_game_opening :-
     nl,
