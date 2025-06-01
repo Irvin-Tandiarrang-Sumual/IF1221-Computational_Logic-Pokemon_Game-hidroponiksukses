@@ -1,9 +1,19 @@
+:- dynamic(final_mode/1).
+:- dynamic(mewtwo_defeated/0).
+
+/* cek udh end game atau belum */
+final_mode(false).
+
 /* Pembuka cerita di final stage */
 print_end_game_opening :-
     nl,
-    write('Selamat datang di final stage !!'), nl,
-    write('Persiapkan dirimu !'), nl,
-    write('Kamu akan melawan THE MIGHTY MEWTWO !!'), nl.
+    write('========================================'), nl,
+    write('         FINAL STAGE - LAST BATTLE       '), nl,
+    write('========================================'), nl,
+    write('Selamat datang di final stage!!'), nl,
+    write('Persiapkan dirimu!'), nl,
+    write('Kamu akan melawan...'), nl,
+    write('THE MIGHTY MEWTWO!!!'), nl, nl.
 
 /* buat mewtwo */
 buat_lawan_mewtwo :-
@@ -16,7 +26,7 @@ buat_lawan_mewtwo :-
     retractall(statusLawan(_,_,_,_,_,_)),
     assertz(statusLawan(MaxHP, MaxHP, ATK, DEF, Nama, 99)),
     write('Kamu melawan '), write(Nama), nl,
-    write('Level: '), write(Level1), nl,
+    write('Level: '), write(Level), nl,
     write('HP: '), write(MaxHP), nl,
     write('ATK: '), write(ATK), nl,
     write('DEF: '), write(DEF), nl,
@@ -25,12 +35,31 @@ buat_lawan_mewtwo :-
 
 /* Final battle */
 start_final_battle :-
+    \+ final_mode(true),
     print_end_game_opening,
     retractall(situation(_)),
     assertz(situation(ongoing)),
-    buat_lawan_mewtwo,
-    battle, 
+    final_battle, 
+    retractall(final_mode(_)),
+    assertz(final_mode(true)),
     turn.
+
+/* Battle endgame */
+final_battle :-
+    buat_lawan_mewtwo,
+    LevelKita = player_level,
+    MaxHPKita is HPBase + 2 * LevelKita,
+    ATKKita is ATKBase + 1 * LevelKita,
+    DEFKita is DEFBase + 1 * LevelKita,
+    retractall(statusKita(_,_,_,_,_,_)),
+    assertz(statusKita(MaxHPKita, MaxHPKita, ATKKita, DEFKita, pikachu, 1)),
+    retractall(myTurn),
+    assertz(myTurn),
+    retractall(cooldown_kita(_, _)),
+    retractall(cooldown_lawan(_, _)),
+    assertz(cooldown_kita(0, 0)),
+    assertz(cooldown_lawan(0, 0)),
+    true.
 
 /* check keadaan end game */
 check_endgame :-

@@ -8,6 +8,7 @@
 :- dynamic(statusEfekLawan/1).
 :- dynamic(cooldown_kita/2).
 :- dynamic(cooldown_lawan/2).
+:- dynamic(player_level/1).
 
 
 random_between(Low, High, R) :-
@@ -93,6 +94,8 @@ battle :-
     DEFKita is DEFBase + 1 * LevelKita,
     retractall(statusKita(_,_,_,_,_,_)),
     assertz(statusKita(MaxHPKita, MaxHPKita, ATKKita, DEFKita, pikachu, 1)),
+    retractall(player_level(_)), /* tract lvl */
+    assertz(player_level(LevelKita)),
     retractall(myTurn),
     assertz(myTurn),
     turn,
