@@ -47,7 +47,7 @@ start_final_battle :-
 /* Battle endgame */
 final_battle :-
     buat_lawan_mewtwo,
-    LevelKita = player_level,
+    player_level(LevelKita),
     MaxHPKita is HPBase + 2 * LevelKita,
     ATKKita is ATKBase + 1 * LevelKita,
     DEFKita is DEFBase + 1 * LevelKita,
