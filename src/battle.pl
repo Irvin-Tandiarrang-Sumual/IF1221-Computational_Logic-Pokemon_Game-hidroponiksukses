@@ -116,11 +116,16 @@ battle(Rarity) :-
 
     buat_lawan(Rarity),
 
-    party(Index, ListPokemon),
-    nth0(Index, ListPokemon, PokemonKita),
+    % Ambil PokemonKita berdasarkan index party
+    party(_, PokemonKita),
 
+    % Ambil level pemain
+    player(_, _, _, _, _, _, LevelKita),
+
+    % Ambil base stats dari Pokemon yang digunakan
     base_stats(HPBase, ATKBase, DEFBase, PokemonKita),
-    
+
+    % Hitung status bertarung pemain
     MaxHPKita is HPBase + 2 * LevelKita,
     ATKKita is ATKBase + 1 * LevelKita,
     DEFKita is DEFBase + 1 * LevelKita,
@@ -133,18 +138,21 @@ battle(Rarity) :-
 
     retractall(myTurn),
     assertz(myTurn),
+
     random_between(1, 10, R),
     (R >= 9 ->
         statusLawan(_,_,_,_,NamaLawan,_),
         quiz_pokemon(NamaLawan)
-    ),
-    turn,
+    ; true),
+
+    % Inisialisasi cooldown
     retractall(cooldown_kita(_, _)),
     retractall(cooldown_lawan(_, _)),
     assertz(cooldown_kita(0, 0)),
     assertz(cooldown_lawan(0, 0)),
 
-    true.
+    % Mulai giliran
+    turn.
 
 
 turn :-
