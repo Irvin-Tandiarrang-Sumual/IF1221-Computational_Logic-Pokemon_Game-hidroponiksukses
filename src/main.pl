@@ -13,6 +13,7 @@
 :- include('player.pl').
 :- include('help.pl').
 :- include('map.pl').
+:- include('inventory.pl').
 
 /* Start game*/
 start :-
