@@ -29,8 +29,8 @@ pokeSkill(geodude, tackle, rock_throw).
 pokeSkill(snorlax, tackle, rest).
 pokeSkill(articuno, gust, ice_shard).
 
-buat_lawan :-
-    pokeRandomizer(Nama),
+buat_lawan(Rarity) :-
+    pokeRandomizer(Rarity, Nama),
     
     % Ambil remaining moves
     remaining_moves(Remaining),
@@ -57,36 +57,32 @@ buat_lawan :-
     write('ATK: '), write(ATK), nl,
     write('DEF: '), write(DEF), nl, nl,
     write('Pilih Pokemon mu dari party!'), nl,
-
+    
 
     retractall(defendStatus(_, _)),
     assertz(defendStatus(1, 1)).
 
 % Pilih pokemon secara acak berdasarkan rarity
-pokeRandomizer(Nama) :-
-    random_between(1, 100, Roll),
-    (
-        Roll =< 60 ->
-            findall(N, pokemon(_, N, common), CommonList),
-            random_member(Nama, CommonList)
-    ;
-        Roll =< 85 ->
-            findall(N, pokemon(_, N, rare), RareList),
-            random_member(Nama, RareList)
-    ;
-        Roll =< 95 ->
-            findall(N, pokemon(_, N, epic), EpicList),
-            random_member(Nama, EpicList)
-    ;
-        findall(N, pokemon(_, N, legendary), LegendaryList),
-        random_member(Nama, LegendaryList)
-    ).
+pokeRandomizer(common, Nama) :-
+    findall(N, pokemon(_, N, common), CommonList),
+    random_member(Nama, CommonList).
 
+pokeRandomizer(rare, Nama) :-
+    findall(N, pokemon(_, N, rare), RareList),
+    random_member(Nama, RareList).
 
-battle :-
+pokeRandomizer(epic, Nama) :-
+    findall(N, pokemon(_, N, epic), EpicList),
+    random_member(Nama, EpicList).
+
+pokeRandomizer(legendary, Nama) :-
+    findall(N, pokemon(_, N, legendary), LegendaryList),
+    random_member(Nama, LegendaryList).
+
+battle(Rarity) :-
     retractall(situation(_)),
     assertz(situation(ongoing)),
-    buat_lawan,
+    buat_lawan(Rarity),
     base_stats(HPBase, ATKBase, DEFBase, pikachu),
     LevelKita = 5,
     MaxHPKita is HPBase + 2 * LevelKita,
