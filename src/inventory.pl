@@ -61,8 +61,8 @@ catch_pokemon(Pokemon) :-
             replace_nth(Index, Inventory, pokeball(filled(Pokemon)), NewInventory),
             retract(item_inventory(Inventory)),
             assertz(item_inventory(NewInventory)),
-            write(Pokemon), write(' tertangkap dan disimpan di Poké Ball slot '), write(Index), nl
-        ;   write('Tidak ada Poké Ball kosong! Gagal menangkap '), write(Pokemon), nl, fail
+            write(Pokemon), write(' tertangkap dan disimpan di Poke Ball slot '), write(Index), nl
+        ;   write('Tidak ada Poke Ball kosong! Gagal menangkap '), write(Pokemon), nl, fail
         )
     ).
 
@@ -116,10 +116,10 @@ add_to_party(X, Pokemon) :-
     (Len < Max ->
         assertz(party(X, Pokemon)),
         format('~w telah ditambahkan ke party.~n', [Pokemon]);
-        write('Party penuh! Tidak bisa menambahkan Pokémon lagi.'), nl, fail).
+        write('Party penuh! Tidak bisa menambahkan Pokemon lagi.'), nl, fail).
 
 show_party :-
-    write('=== Pokémon di Party ==='), nl,
+    write('=== Pokemon di Party ==='), nl,
     (party(_, _) ->
         forall(party(_, P), format('- ~w~n', [P]));
         write('Party kosong.'), nl).
