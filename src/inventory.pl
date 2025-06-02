@@ -51,14 +51,21 @@ use_pokeball :-
 
 /* Menangkap Pokémon */
 catch_pokemon(Pokemon) :-
-    item_inventory(Inventory),
-    (   nth0(Index, Inventory, pokeball(empty)) ->
-        replace_nth(Index, Inventory, pokeball(filled(Pokemon)), NewInventory),
-        retract(item_inventory(Inventory)),
-        assertz(item_inventory(NewInventory)),
-        write(Pokemon), write(' tertangkap dan disimpan di slot '), write(Index), nl
-    ;   write('Tidak ada Poké Ball kosong!'), nl
+    party_slots_remaining(Remaining),
+    (Remaining > 0 ->
+        add_to_party(Pokemon),
+        write(Pokemon), write(' tertangkap dan masuk ke party!'), nl
+    ;   
+        item_inventory(Inventory),
+        (   nth0(Index, Inventory, pokeball(empty)) ->
+            replace_nth(Index, Inventory, pokeball(filled(Pokemon)), NewInventory),
+            retract(item_inventory(Inventory)),
+            assertz(item_inventory(NewInventory)),
+            write(Pokemon), write(' tertangkap dan disimpan di Poké Ball slot '), write(Index), nl
+        ;   write('Tidak ada Poké Ball kosong! Gagal menangkap '), write(Pokemon), nl, fail
+        )
     ).
+
 
 /* Menampilkan inventori */
 show_bag :-
