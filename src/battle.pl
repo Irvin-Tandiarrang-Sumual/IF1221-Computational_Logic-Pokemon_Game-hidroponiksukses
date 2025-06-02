@@ -98,6 +98,7 @@ battle :-
     assertz(player_level(LevelKita)),
     retractall(myTurn),
     assertz(myTurn),
+/ *   quiz_pokemon(), */
     turn,
     retractall(cooldown_kita(_, _)),
     retractall(cooldown_lawan(_, _)),
