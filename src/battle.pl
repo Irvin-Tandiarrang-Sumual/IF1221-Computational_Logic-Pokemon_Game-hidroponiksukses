@@ -60,7 +60,8 @@ buat_lawan :-
 
 
     retractall(defendStatus(_, _)),
-    assertz(defendStatus(1, 1)).
+    assertz(defendStatus(1, 1)),
+    true.
 
 % Pilih pokemon secara acak berdasarkan rarity
 pokeRandomizer(Nama) :-
@@ -86,24 +87,34 @@ pokeRandomizer(Nama) :-
 battle :-
     retractall(situation(_)),
     assertz(situation(ongoing)),
+
     buat_lawan,
-    base_stats(HPBase, ATKBase, DEFBase, pikachu),
+
+    party(Index, ListPokemon),
+    nth0(Index, ListPokemon, PokemonKita),
+
+    base_stats(HPBase, ATKBase, DEFBase, PokemonKita),
     LevelKita = 5,
     MaxHPKita is HPBase + 2 * LevelKita,
     ATKKita is ATKBase + 1 * LevelKita,
     DEFKita is DEFBase + 1 * LevelKita,
+
     retractall(statusKita(_,_,_,_,_,_)),
-    assertz(statusKita(MaxHPKita, MaxHPKita, ATKKita, DEFKita, pikachu, 1)),
-    retractall(player_level(_)), /* tract lvl */
+    assertz(statusKita(MaxHPKita, MaxHPKita, ATKKita, DEFKita, PokemonKita, 1)),
+
+    retractall(player_level(_)),
     assertz(player_level(LevelKita)),
+
     retractall(myTurn),
     assertz(myTurn),
-    turn,
+
     retractall(cooldown_kita(_, _)),
     retractall(cooldown_lawan(_, _)),
     assertz(cooldown_kita(0, 0)),
     assertz(cooldown_lawan(0, 0)),
+
     true.
+
 
 turn :-
     situation(ongoing), !,
