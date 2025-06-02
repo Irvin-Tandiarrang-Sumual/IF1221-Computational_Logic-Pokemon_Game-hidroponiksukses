@@ -29,6 +29,36 @@ pokeSkill(geodude, tackle, rock_throw).
 pokeSkill(snorlax, tackle, rest).
 pokeSkill(articuno, gust, ice_shard).
 
+daftar_party :-
+    findall(Index-Nama, party(Index, Nama), List),
+    sort(List, Sorted), % sort biar urut indeks
+    write('Daftar Pokémon dalam party kamu:'), nl,
+    tampilkan_party(Sorted).
+
+tampilkan_party([]).
+tampilkan_party([Index-Nama | T]) :-
+    format('~w: ~w~n', [Index, Nama]),
+    tampilkan_party(T).
+
+pilih_pokemon :-
+    write('Masukkan indeks Pokémon yang ingin kamu gunakan: '), nl,
+    write('>> '),
+    read(Index),
+    (   party(Index, Nama) ->
+        LevelKita = 5,
+        base_stats(HPBase, ATKBase, DEFBase, Nama),
+        MaxHPKita is HPBase + 2 * LevelKita,
+        ATKKita is ATKBase + 1 * LevelKita,
+        DEFKita is DEFBase + 1 * LevelKita,
+        retractall(statusKita(_,_,_,_,_,_)),
+        assertz(statusKita(MaxHPKita, MaxHPKita, ATKKita, DEFKita, Nama, 1)),
+        retractall(player_level(_)),
+        assertz(player_level(LevelKita)),
+        format('Kamu memilih ~w sebagai Pokémon utama!~n', [Nama])
+    ;   write('Indeks tidak ditemukan dalam party.'), nl,
+        pilih_pokemon  % Ulangi jika salah input
+    ).
+
 buat_lawan(Rarity) :-
     pokeRandomizer(Rarity, Nama),
     
@@ -57,8 +87,8 @@ buat_lawan(Rarity) :-
     write('ATK: '), write(ATK), nl,
     write('DEF: '), write(DEF), nl, nl,
     write('Pilih Pokemon mu dari party!'), nl,
-    
-
+    daftar_party,
+    pilih_pokemon,
     retractall(defendStatus(_, _)),
     assertz(defendStatus(1, 1)),
     true.
@@ -90,7 +120,7 @@ battle(Rarity) :-
     nth0(Index, ListPokemon, PokemonKita),
 
     base_stats(HPBase, ATKBase, DEFBase, PokemonKita),
-    LevelKita = 5,
+    
     MaxHPKita is HPBase + 2 * LevelKita,
     ATKKita is ATKBase + 1 * LevelKita,
     DEFKita is DEFBase + 1 * LevelKita,
