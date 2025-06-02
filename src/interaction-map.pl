@@ -48,6 +48,7 @@ move(DX, DY) :-
     retractall(map(_)), assertz(map(NewMatrix)),
     retractall(last_player_tile(_)),
     assertz(last_player_tile(DestTile)),
+    ( last_player_tile('H') -> pcenter ; true),
 
     /* Update current moves left */
     NewMovesLeft is MovesLeft - 1,
@@ -66,6 +67,40 @@ moveUp :- write('Kamu bergerak ke atas'), move(-2,0), check_player_pokemon.
 moveLeft :- write('Kamu bergerak ke kiri'), move(0,-2), check_player_pokemon.
 moveDown :- write('Kamu bergerak ke bawah'), move(2,0), check_player_pokemon.
 moveRight :- write('Kamu bergerak ke kanan'), move(0,2), check_player_pokemon.
+
+/* PokeCenter's interaction feature */
+
+pcenter :- pcenter_step(X).
+
+pcenter_step(X) :-
+    p_step(X),
+    wait_enter,
+    X1 is X + 1,
+    (X1 =< 2 -> pcenter_step(X1); true).
+
+p_step(0) :- pcenter_ascii.
+p_step(1) :- nursejoy_ascii.
+p_step(2) :- 
+    nursejoy_w_ascii, 
+    write('|    Type "heal." to interact with PokeCenter!'), nl, nl, 
+    read(X),
+    interactPcenter(X).
+
+/* Interact with PokeCenter! */
+interactPcenter(heal):-
+    update_all_poke_hp_to_max,
+    write('|    Nurse Joy: Here you go dear, I have recovered all of your pokemon to full HP!'),nl,nl.
+
+interactPcenter(_):-
+    write('|    Nurse Joy: Aww, alright then sweetie, have a great adventure!'),nl,nl.
+
+update_all_poke_hp_to_max :-
+    forall(
+        ( retract(curr_health(Index, Party, _)),
+          poke_stats(HP, _, _, _, Index, Party)
+        ),
+        assert(curr_health(Index, Party, HP))
+    ).
 
 /* Currently: Replace the old tile with 0 */
 update_player_map(Matrix, (OldX, OldY), NewX, NewY, NewMatrix) :-

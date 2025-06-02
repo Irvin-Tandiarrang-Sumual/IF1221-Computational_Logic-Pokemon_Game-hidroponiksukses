@@ -6,7 +6,7 @@
 :- dynamic(idAv/1).
 /* party: (Inventory index (start from 1), Pokemon_name) */
 :- dynamic(party/2).
-/* TODO */
+/* curr_health : (Indeks, Boolean_party, CurrHP)*/
 :- dynamic(curr_health/3).
 /* TODO */
 :- dynamic(isSkillUsed_Self/2).
@@ -30,14 +30,14 @@ starterToInventory(X, Y) :-
     /* Setting stats for choosen starter 1 (X) */
     base_stats(HP1, ATK1, DEF1, X),
     asserta(poke_stats(HP1, ATK1, DEF1, X, 1)),
-    asserta(curr_health(1,HP1)),
+    asserta(curr_health(1,1,HP1)),
     asserta(isSkillUsed_Self(1,0)),
     add_to_party(1, X),
     asserta(jml_inventory(1)),
     /* Setting stats for choosen starter 2 (Y) */
     base_stats(HP2, ATK2, DEF2, Y),
     asserta(poke_stats(HP2, ATK2, DEF2, Y, 2)),
-    asserta(curr_health(1,HP2)),
+    asserta(curr_health(2,1,HP2)),
     asserta(isSkillUsed_Self(2,0)),
     add_to_party(2, Y),
     asserta(jml_inventory(2)),
