@@ -1,5 +1,6 @@
 :- dynamic(remaining_moves/1).
 :- dynamic(map/1).
+:- dynamic(last_player_tile/1).
 
 /* User's messages interface */
 boundaries_message :-
@@ -28,26 +29,29 @@ check_valid_move(_, _, _) :-
     boundaries_message,
     fail.
 
-move(DX,DY):-
+move(DX, DY) :-
     /* Check whether the player's stil have moves left */
     remaining_moves(MovesLeft),
     MovesLeft > 0,
 
-    /* Update position */
     map(Matrix),
     findall((X,Y), (nth0(X, Matrix, Row), nth0(Y, Row, 'P')), [(OldX, OldY)]),
-    NewX is OldX + (DX),
-    NewY is OldY + (DY),
+    NewX is OldX + DX,
+    NewY is OldY + DY,
     check_valid_move(Matrix, NewX, NewY),
-    update_player_map(Matrix, (OldX, OldY), NewX, NewY, NewMatrix),
+    nth0(NewX, Matrix, NewRow), nth0(NewY, NewRow, DestTile),
+
+    /* Update position */
+    ( last_player_tile(TileToRestore) -> true ; TileToRestore = ' ' ),
+    replace_in_matrix(Matrix, (OldX, OldY), TileToRestore, TempMatrix),
+    replace_in_matrix(TempMatrix, (NewX, NewY), 'P', NewMatrix),
+    retractall(map(_)), assertz(map(NewMatrix)),
+    retractall(last_player_tile(_)),
+    assertz(last_player_tile(DestTile)),
 
     /* Update current moves left */
     NewMovesLeft is MovesLeft - 1,
-    retract(remaining_moves(_)),
-    assertz(remaining_moves(NewMovesLeft)),
-    retract(map(_)),
-    assertz(map(NewMatrix)),
-    
+    retract(remaining_moves(_)), assertz(remaining_moves(NewMovesLeft)),
     /* Print current moves left */
     format("Moves left: ~d~n", [NewMovesLeft]).
 
@@ -57,12 +61,40 @@ move(_, _) :-
     fail.
 
 /* Player's movement */
-moveUp :- move(-2,0), mapping.
-moveLeft :- move(0,-2), mapping.
-moveDown :- move(2,0), mapping.
-moveRight :- move(0,2), mapping.
+moveUp :- move(-2,0), check_player_pokemon, showMap.
+moveLeft :- move(0,-2), check_player_pokemon, showMap.
+moveDown :- move(2,0), check_player_pokemon, showMap.
+moveRight :- move(0,2), check_player_pokemon, showMap.
 
 /* Currently: Replace the old tile with 0 */
 update_player_map(Matrix, (OldX, OldY), NewX, NewY, NewMatrix) :-
-    replace_in_matrix(Matrix, (OldX, OldY), '0', TempMatrix),
+    replace_in_matrix(Matrix, (OldX, OldY), ' ', TempMatrix),
     replace_in_matrix(TempMatrix, (NewX, NewY), 'P', NewMatrix).
+
+check_player_pokemon :-
+    map(Matrix),
+    findall((X,Y), (nth0(X, Matrix, Row), nth0(Y, Row, 'P')), [(PX, PY)]),
+    pokemap(PokeList),
+    (last_player_tile('#') ->
+        write('Kamu memasuki semak-semak!'), nl, 
+        (
+            member((Type, (PX, PY)), PokeList) ->
+                format("Kamu menemukan Pokemon rarity ~w!~n", [Type])
+            ;
+                write('Sepertinya tidak ada tanda-tanda kehidupan disini...'), nl
+        )
+    ;
+        (
+            member((Type, (PX, PY)), PokeList) ->
+                format("Kamu menemukan Pokemon rarity ~w!~n", [Type])
+            ;
+                true
+        )
+     ).
+
+player_on_any_pokemon(Type, (PX, PY)) :-
+    map(Matrix),
+    nth0(PX, Matrix, Row),
+    nth0(PY, Row, 'P'),
+    pokemap(PokeList),
+    member((Type, (PX, PY)), PokeList).
