@@ -3,10 +3,10 @@
 :- dynamic(jml_inventory/1).
 :- dynamic(playerPos/2).
 :- dynamic(base_stats/4).
-:- dynamic(poke_stats/5).
+:- dynamic(poke_stats/6).
 :- dynamic(posisiPokemon/3).
 :- dynamic(battleNow/1).
-:- dynamic(curr_health/2).
+:- dynamic(curr_health/3).
 :- dynamic(isOnPoke/1).
 :- dynamic(isBattle/1).
 :- dynamic(level/4).
@@ -67,7 +67,7 @@ base_stats(250, 300, 250, mewtwo).
 init_starter:- asserta(level(1,pidgey,0, 0)), asserta(level(1,charmander,0, 0)), asserta(level(1,squirtle,0, 0)).
 
 /* Poke stats */
-/* poke_stats(HP, ATK, DEF, Nama_pokemon, Slot_Inventory) */
+/* poke_stats(HP, ATK, DEF, Nama_pokemon, Slot_Inventory, Boolean_party) */
 
 /* modifier */
 /* superEffective(T1,T2) : T1 is super effective against T2 */

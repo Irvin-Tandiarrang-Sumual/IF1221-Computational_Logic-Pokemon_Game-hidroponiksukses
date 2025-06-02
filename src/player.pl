@@ -7,7 +7,7 @@
 /* party: (Inventory index (start from 1), Pokemon_name) */
 :- dynamic(party/2).
 /* TODO */
-:- dynamic(curr_health/2).
+:- dynamic(curr_health/3).
 /* TODO */
 :- dynamic(isSkillUsed_Self/2).
 /* TODO */
