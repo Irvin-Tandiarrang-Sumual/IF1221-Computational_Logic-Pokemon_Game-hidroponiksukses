@@ -48,6 +48,7 @@ move(DX, DY) :-
     retractall(map(_)), assertz(map(NewMatrix)),
     retractall(last_player_tile(_)),
     assertz(last_player_tile(DestTile)),
+    ( last_player_tile('H') -> pcenter ; true),
 
     /* Update current moves left */
     NewMovesLeft is MovesLeft - 1,
