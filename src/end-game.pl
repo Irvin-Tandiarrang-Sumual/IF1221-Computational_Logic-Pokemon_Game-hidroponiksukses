@@ -48,6 +48,7 @@ start_final_battle :-
 final_battle :-
     buat_lawan_mewtwo,
     player_level(LevelKita),
+    base_stats(HPBase, ATKBase, DEFBase, pikachu),
     MaxHPKita is HPBase + 2 * LevelKita,
     ATKKita is ATKBase + 1 * LevelKita,
     DEFKita is DEFBase + 1 * LevelKita,

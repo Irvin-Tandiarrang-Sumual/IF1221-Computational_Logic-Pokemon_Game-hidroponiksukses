@@ -314,6 +314,7 @@ reduce_cooldown :-
 
 % Burn Effect
 apply_burn(ID) :-
+    \+ immune_status(ID), 
     efek_pokemon(ID, burn(T, D)),
     status_pokemon(ID, CurHP, MaxHP, ATK, DEF, Nama),
     NewHP is max(0, CurHP - D),
@@ -327,6 +328,7 @@ apply_burn(_).  % fallback bila tidak ada efek burn
 
 % Paralyze Effect
 apply_paralyze(ID) :-
+    \+ immune_status(ID), 
     efek_pokemon(ID, paralyze),
     random_float(X),
     ( X < 0.2 ->
@@ -370,3 +372,4 @@ enemy_use_skill(NamaSkill) :-
     damage_skill(Power),
     apply_ability(Ability, Chance),
     turn.
+
