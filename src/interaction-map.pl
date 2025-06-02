@@ -53,7 +53,8 @@ move(DX, DY) :-
     NewMovesLeft is MovesLeft - 1,
     retract(remaining_moves(_)), assertz(remaining_moves(NewMovesLeft)),
     /* Print current moves left */
-    format("Moves left: ~d~n", [NewMovesLeft]).
+    format("Moves left: ~d~n", [NewMovesLeft]),
+    write('HP Pokemon dipulihkan sebanyak 20% dari total max HP masing-masing.').
 
 move(_, _) :-
     remaining_moves(0),
@@ -61,10 +62,10 @@ move(_, _) :-
     fail.
 
 /* Player's movement */
-moveUp :- move(-2,0), check_player_pokemon, showMap.
-moveLeft :- move(0,-2), check_player_pokemon, showMap.
-moveDown :- move(2,0), check_player_pokemon, showMap.
-moveRight :- move(0,2), check_player_pokemon, showMap.
+moveUp :- write('Kamu bergerak ke atas'), move(-2,0), check_player_pokemon, showMap.
+moveLeft :- write('Kamu bergerak ke kiri'), move(0,-2), check_player_pokemon, showMap.
+moveDown :- write('Kamu bergerak ke bawah'), move(2,0), check_player_pokemon, showMap.
+moveRight :- write('Kamu bergerak ke kanan'), move(0,2), check_player_pokemon, showMap.
 
 /* Currently: Replace the old tile with 0 */
 update_player_map(Matrix, (OldX, OldY), NewX, NewY, NewMatrix) :-
@@ -79,14 +80,18 @@ check_player_pokemon :-
         write('Kamu memasuki semak-semak!'), nl, 
         (
             member((Type, (PX, PY)), PokeList) ->
-                format("Kamu menemukan Pokemon rarity ~w!~n", [Type])
+                format("Kamu menemukan Pokemon rarity ~w! pilih opsi: ~n", [Type]),
+                write('1.   Bertarung'), nl, write('2.   Tangkap'), nl, write('3.   Kabur(NOOB)'), nl,
+                write('>> '), read(Pilihan)
             ;
                 write('Sepertinya tidak ada tanda-tanda kehidupan disini...'), nl
         )
     ;
         (
             member((Type, (PX, PY)), PokeList) ->
-                format("Kamu menemukan Pokemon rarity ~w!~n", [Type])
+                format("Kamu menemukan Pokemon rarity ~w! pilih opsi: ~n", [Type]),
+                write('1.   Bertarung'), nl, write('2.   Tangkap'), nl, write('3.   Kabur(NOOB)'), nl,
+                write('>> '), read(Pilihan)
             ;
                 true
         )

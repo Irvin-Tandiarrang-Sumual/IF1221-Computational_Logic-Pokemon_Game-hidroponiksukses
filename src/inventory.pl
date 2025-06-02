@@ -1,50 +1,32 @@
-:- dynamic(item_inventory/1).
+:- dynamic(item_inventory/2).
 
 max_party_size(4).
 
 /* Inisialisasi inventori */
 initialize_inventory :-
-    length(InitialItems, 40),
-    fill_initial_items(InitialItems, 20),
-    assertz(item_inventory(InitialItems)).
+    initialize_inventory(0).
 
-fill_initial_items(Items, N) :-
-    fill_pokeballs(Items, N, 0).
-
-fill_pokeballs([], _, _).
-fill_pokeballs([pokeball(empty)|T], N, Count) :-
-    Count < N,
-    NewCount is Count + 1,
-    fill_pokeballs(T, N, NewCount).
-fill_pokeballs([empty|T], N, Count) :-
-    fill_pokeballs(T, N, Count).
+initialize_inventory(40) :- !.
+initialize_inventory(Index) :-
+    (Index < 20 -> Item = pokeball(empty); Item = empty),
+    assertz(item_inventory(Index, Item)),
+    NextIndex is Index + 1,
+    initialize_inventory(NextIndex).
 
 /* Menambahkan item */
 add_item(Item) :-
-    item_inventory(Inventory),
-    (   nth0(Index, Inventory, empty) ->
-        replace_nth(Index, Inventory, Item, NewInventory),
-        retract(item_inventory(Inventory)),
-        assertz(item_inventory(NewInventory)),
-        write('Item '), write(Item), 
-        write(' ditambahkan ke slot '), write(Index), nl
+    (   item_inventory(Index, empty) ->
+        retract(item_inventory(Index, empty)),
+        assertz(item_inventory(Index, Item)),
+        format('Item ~w ditambahkan ke slot ~w~n', [Item, Index])
     ;   write('Inventori penuh! Tidak bisa menambahkan item.'), nl
     ).
 
-/* Mengganti elemen ke-n dalam list */
-replace_nth(0, [_|T], Item, [Item|T]).
-replace_nth(N, [H|T], Item, [H|NewT]) :-
-    N > 0,
-    N1 is N - 1,
-    replace_nth(N1, T, Item, NewT).
-
 /* Menggunakan Poké Ball */
 use_pokeball :-
-    item_inventory(Inventory),
-    (   nth0(Index, Inventory, pokeball(empty)) ->
-        replace_nth(Index, Inventory, empty, NewInventory),
-        retract(item_inventory(Inventory)),
-        assertz(item_inventory(NewInventory)),
+    (   item_inventory(Index, pokeball(empty)) ->
+        retract(item_inventory(Index, pokeball(empty))),
+        assertz(item_inventory(Index, empty)),
         write('Poké Ball digunakan.'), nl
     ;   write('Tidak ada Poké Ball kosong!'), nl
     ).
@@ -54,46 +36,38 @@ catch_pokemon(Pokemon) :-
     party_slots_remaining(Remaining),
     (Remaining > 0 ->
         add_to_party(Pokemon),
-        write(Pokemon), write(' tertangkap dan masuk ke party!'), nl
-    ;   
-        item_inventory(Inventory),
-        (   nth0(Index, Inventory, pokeball(empty)) ->
-            replace_nth(Index, Inventory, pokeball(filled(Pokemon)), NewInventory),
-            retract(item_inventory(Inventory)),
-            assertz(item_inventory(NewInventory)),
-            write(Pokemon), write(' tertangkap dan disimpan di Poke Ball slot '), write(Index), nl
-        ;   write('Tidak ada Poke Ball kosong! Gagal menangkap '), write(Pokemon), nl, fail
+        format('~w tertangkap dan masuk ke party!~n', [Pokemon])
+    ;
+        (   item_inventory(Index, pokeball(empty)) ->
+            retract(item_inventory(Index, pokeball(empty))),
+            assertz(item_inventory(Index, pokeball(filled(Pokemon)))),
+            format('~w tertangkap dan disimpan di Poké Ball slot ~w~n', [Pokemon, Index])
+        ;   format('Tidak ada Poké Ball kosong! Gagal menangkap ~w~n', [Pokemon]), fail
         )
     ).
 
-
 /* Menampilkan inventori */
 show_bag :-
-    item_inventory(Inventory),
     nl, write('=== Isi Inventori (40 slot) ==='), nl,
-    display_inventory(Inventory, 0).
+    show_inventory(0).
 
-display_inventory([], _).
-display_inventory([Item|T], Index) :-
-    write('Slot '), write(Index), write(': '),
-    (   Item == empty
-    ->  write('Kosong')
-    ;   write(Item)
-    ),
+show_inventory(40) :- !.
+show_inventory(Index) :-
+    (   item_inventory(Index, Item) -> true ; Item = kosong ),
+    format('Slot ~w: ', [Index]),
+    (Item == empty -> write('Kosong') ; write(Item)),
     nl,
-    NewIndex is Index + 1,
-    display_inventory(T, NewIndex).
+    Next is Index + 1,
+    show_inventory(Next).
 
 /* Handle item drop setelah pertarungan */
 handle_item_drop :-
-    /* Generate random float antara 0.0 dan 1.0 */
-    random(0, 100, RandInt),  % Angka integer 0-99
-    Rand is RandInt / 100.0,   % Konversi ke float 0.0-0.99
-    
-    (   Rand =< 0.75 ->        /* 75% chance untuk dapat item */
+    random(0, 100, RandInt),
+    Rand is RandInt / 100.0,
+    (   Rand =< 0.75 ->
         random_item(Item),
         add_item(Item),
-        write('Item '), write(Item), write(' didapatkan!'), nl
+        format('Item ~w didapatkan!~n', [Item])
     ;   true
     ).
 
@@ -109,20 +83,17 @@ random_member(Item, List) :-
     nth0(Index, List, Item).
 
 
-add_to_party(X, Pokemon) :-
+add_to_party(Index, Pokemon) :-
     findall(P, party(_, P), List),
     length(List, Len),
     max_party_size(Max),
     (Len < Max ->
-        assertz(party(X, Pokemon)),
-        format('~w telah ditambahkan ke party.~n', [Pokemon]);
-        write('Party penuh! Tidak bisa menambahkan Pokemon lagi.'), nl, fail).
+        assertz(party(Index, Pokemon)),
+        write(Pokemon), write(' telah ditambahkan ke party.'), nl
+    ;
+        write('Party penuh!'), nl, fail
+    ).
 
-show_party :-
-    write('=== Pokemon di Party ==='), nl,
-    (party(_, _) ->
-        forall(party(_, P), format('- ~w~n', [P]));
-        write('Party kosong.'), nl).
 
 party_slots_remaining(Remaining) :-
     findall(P, party(_, P), List),
