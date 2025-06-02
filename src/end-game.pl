@@ -42,6 +42,7 @@ start_final_battle :-
     final_battle, 
     retractall(final_mode(_)),
     assertz(final_mode(true)),
+    quiz_pokemon(mewtwo),
     turn.
 
 /* Battle endgame */

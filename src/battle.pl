@@ -133,7 +133,12 @@ battle(Rarity) :-
 
     retractall(myTurn),
     assertz(myTurn),
-
+    random_between(1, 10, R),
+    (R >= 9 ->
+        statusLawan(_,_,_,_,NamaLawan,_),
+        quiz_pokemon(NamaLawan)
+    ),
+    turn,
     retractall(cooldown_kita(_, _)),
     retractall(cooldown_lawan(_, _)),
     assertz(cooldown_kita(0, 0)),
