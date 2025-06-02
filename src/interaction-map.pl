@@ -79,27 +79,62 @@ check_player_pokemon :-
     (last_player_tile('#') ->
         write('Kamu memasuki semak-semak!'), nl, 
         (
-            member((Type, (PX, PY)), PokeList) ->
-                format("Kamu menemukan Pokemon rarity ~w! pilih opsi: ~n", [Type]),
+            member((Rarity, (PX, PY)), PokeList) ->
+                format("Kamu menemukan Pokemon rarity ~w! pilih opsi: ~n", [Rarity]),
                 write('1.   Bertarung'), nl, write('2.   Tangkap'), nl, write('3.   Kabur(NOOB)'), nl,
-                write('>> '), read(Pilihan)
+                write('>> '), read(Pilihan), handle_encounter_choice(Pilihan, Rarity, (PX, PY))
             ;
                 write('Sepertinya tidak ada tanda-tanda kehidupan disini...'), nl
         )
     ;
         (
-            member((Type, (PX, PY)), PokeList) ->
-                format("Kamu menemukan Pokemon rarity ~w! pilih opsi: ~n", [Type]),
+            member((Rarity, (PX, PY)), PokeList) ->
+                format("Kamu menemukan Pokemon rarity ~w! pilih opsi: ~n", [Rarity]),
                 write('1.   Bertarung'), nl, write('2.   Tangkap'), nl, write('3.   Kabur(NOOB)'), nl,
-                write('>> '), read(Pilihan)
+                write('>> '), read(Pilihan), handle_encounter_choice(Pilihan, Rarity, (PX, PY))
             ;
                 true
         )
      ).
 
-player_on_any_pokemon(Type, (PX, PY)) :-
+handle_encounter_choice(1, _, _) :-
+    write('Persiapkan dirimu!'), nl,
+    write('Pertarungan yang epik baru saja dimulai!'), nl,
+    battle.
+
+handle_encounter_choice(2, Rarity, Pos) :-
+    write('Kamu memilih menangkap pokemon'), nl,
+    catch_rate(Rarity, RateBase),
+    random_between(0, 35, Rnd),
+    CatchRate is RateBase + Rnd,
+    write('Hasil catch rate: '), write(CatchRate), nl,
+    ( CatchRate > 50 ->
+        write('Kamu berhasil menangkap pokemon!'), nl,
+        catch_pokemon()
+        remove_pokemon_from_map(Pos)
+    ; 
+        write('Kamu gagal menangkap pokemon!'), nl,
+        write('Persiapkan dirimu! Pertarungan yang epik baru saja dimulai!'), nl,
+        battle ).
+
+handle_encounter_choice(3, _, _) :-
+    write('Kamu memilih kabur!'), nl,
+    write('Skill issue.'), nl.
+
+handle_encounter_choice(_, Rarity, Pos) :-
+    write('Pilihan tidak valid, coba lagi.'), nl,
+    write('>> '), read(NewChoice),
+    handle_encounter_choice(NewChoice, Rarity, Pos).
+
+player_on_any_pokemon(Rarity, (PX, PY)) :-
     map(Matrix),
     nth0(PX, Matrix, Row),
     nth0(PY, Row, 'P'),
     pokemap(PokeList),
-    member((Type, (PX, PY)), PokeList).
+    member((Rarity, (PX, PY)), PokeList).
+
+remove_pokemon_from_map(Pos) :-
+    pokemap(PokeList),
+    delete(PokeList, (_, Pos), NewList),
+    retractall(pokemap(_)),
+    assertz(pokemap(NewList)).

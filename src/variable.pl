@@ -128,3 +128,8 @@ rarity(common, 20, 10, 40).
 rarity(rare, 30, 20, 30).
 rarity(epic, 40, 30, 25).
 rarity(legendary, 50, 40, 20).
+
+catch_rate(common, 40).
+catch_rate(rare, 30).
+catch_rate(epic, 25).
+catch_rate(legendary, 10).
