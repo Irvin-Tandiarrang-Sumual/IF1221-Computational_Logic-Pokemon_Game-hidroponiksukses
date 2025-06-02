@@ -19,6 +19,35 @@ start:- init, write('Game already started'),!.
 /* kondisi: game not started */
 start:- \+init, assertz(init), init_moves(20), assertz(player(ash, 0, 0, 0, 0, 0, 0)), title, created_by, startgame(0).
 
+exit:- init, retractall(init),
+    retractall(player(_, _, _, _, _, _, _)),
+    retractall(init_moves(_)),
+    retractall(remaining_moves(_)),
+    retractall(map(_)),
+    retractall(last_player_tile(_)),
+    retractall(pokemap(_)),
+    retractall(listPoke(_)),
+    retractall(idAv(_)),
+    retractall(no_inventory(_, _)),
+    retractall(curr_health(_, _)),
+    retractall(isSkillUsed_Self(_, _)),
+    retractall(isHeal(_)),
+    retractall(inventory(_)),
+    retractall(legendary(_)),
+    retractall(jml_inventory(_)),
+    retractall(playerPos(_, _)),
+    retractall(base_stats(_, _, _, _)),
+    retractall(poke_stats(_, _, _, _, _)),
+    retractall(posisiPokemon(_, _, _)),
+    retractall(battleNow(_)),
+    retractall(isOnPoke(_)),
+    retractall(isBattle(_)),
+    retractall(level(_, _, _, _)),
+    retractall(skill(_, _, _, _, _)),
+    retractall(health(_, _)).
+
+exit:- \+init, write('Game is not started'),!.
+
 /* update_name: input name and change the dynamic variable */
 update_name(NewName):- player(_, Poke1, Poke2, Poke3, Poke4, X_pos, Y_pos),
     retract(player(_, Poke1, Poke2, Poke3, Poke4, X_pos, Y_pos)),

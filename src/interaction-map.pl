@@ -61,10 +61,10 @@ move(_, _) :-
     fail.
 
 /* Player's movement */
-moveUp :- move(-2,0), check_player_pokemon, mapping.
-moveLeft :- move(0,-2), check_player_pokemon, mapping.
-moveDown :- move(2,0), check_player_pokemon, mapping.
-moveRight :- move(0,2), check_player_pokemon, mapping.
+moveUp :- move(-2,0), check_player_pokemon, showMap.
+moveLeft :- move(0,-2), check_player_pokemon, showMap.
+moveDown :- move(2,0), check_player_pokemon, showMap.
+moveRight :- move(0,2), check_player_pokemon, showMap.
 
 /* Currently: Replace the old tile with 0 */
 update_player_map(Matrix, (OldX, OldY), NewX, NewY, NewMatrix) :-
