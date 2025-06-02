@@ -34,8 +34,9 @@ use_pokeball :-
 /* Menangkap Pokémon */
 catch_pokemon(Pokemon) :-
     party_slots_remaining(Remaining),
-    LevelMin is min(14, max(2, round(2 + (20 - Remaining) / 2))),
-    LevelMax is min(14, max(LevelMin, round(4 + (20 - Remaining) / 1.5))),
+    remaining_moves(Remaining1),
+    LevelMin is min(14, max(2, round(2 + (20 - Remaining1) / 2))),
+    LevelMax is min(14, max(LevelMin, round(4 + (20 - Remaining1) / 1.5))),
     random_between(LevelMin, LevelMax, Level),
     base_stats(HPBase, ATKBase, DEFBase, Pokemon),
     HP is HPBase + 2 * Level,
