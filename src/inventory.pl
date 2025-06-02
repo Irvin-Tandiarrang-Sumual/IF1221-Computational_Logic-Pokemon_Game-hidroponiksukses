@@ -1,4 +1,7 @@
 :- dynamic(item_inventory/1).
+:- dynamic(party/1).
+
+max_party_size(4).
 
 /* Inisialisasi inventori */
 initialize_inventory :-
@@ -98,3 +101,25 @@ random_member(Item, List) :-
     length(List, Length),
     random(0, Length, Index),
     nth0(Index, List, Item).
+
+
+add_to_party(Pokemon) :-
+    findall(P, party(P), List),
+    length(List, Len),
+    max_party_size(Max),
+    (Len < Max ->
+        assertz(party(Pokemon)),
+        format('~w telah ditambahkan ke party.~n', [Pokemon]);
+        write('Party penuh! Tidak bisa menambahkan Pokémon lagi.'), nl, fail).
+
+show_party :-
+    write('=== Pokémon di Party ==='), nl,
+    (party(_) ->
+        forall(party(P), format('- ~w~n', [P]));
+        write('Party kosong.'), nl).
+
+party_slots_remaining(Remaining) :-
+    findall(P, party(P), List),
+    length(List, Len),
+    max_party_size(Max),
+    Remaining is Max - Len.
