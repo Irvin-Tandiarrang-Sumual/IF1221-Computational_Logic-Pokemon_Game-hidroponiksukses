@@ -28,7 +28,7 @@ use_pokeball :-
         retract(item_inventory(Index, pokeball(empty))),
         assertz(item_inventory(Index, empty)),
         write('Poké Ball digunakan.'), nl
-    ;   write('Tidak ada Poké Ball kosong!'), nl
+    ;   write('Tidak ada Poke Ball kosong!'), nl
     ).
 
 /* Menangkap Pokémon */
@@ -42,7 +42,7 @@ catch_pokemon(Pokemon) :-
             retract(item_inventory(Index, pokeball(empty))),
             assertz(item_inventory(Index, pokeball(filled(Pokemon)))),
             format('~w tertangkap dan disimpan di Poké Ball slot ~w~n', [Pokemon, Index])
-        ;   format('Tidak ada Poké Ball kosong! Gagal menangkap ~w~n', [Pokemon]), fail
+        ;   format('Tidak ada Poke Ball kosong! Gagal menangkap ~w~n', [Pokemon]), fail
         )
     ).
 
