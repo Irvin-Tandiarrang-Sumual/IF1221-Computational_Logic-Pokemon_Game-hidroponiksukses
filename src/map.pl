@@ -218,38 +218,6 @@ place_random_h :-
     retractall(map(_)),
     assertz(map(NewMatrix)).
 
-pcenter :- pcenter_step(X).
-
-pcenter_step(X) :-
-    p_step(X),
-    wait_enter,
-    X1 is X + 1,
-    (X1 =< 2 -> pcenter_step(X1); true).
-
-p_step(0) :- pcenter_ascii.
-p_step(1) :- nursejoy_ascii.
-p_step(2) :- 
-    nursejoy_w_ascii, 
-    write('|    Type HEAL to interact with PokeCenter!'), nl, nl, 
-    read(X),
-    interactPcenter(X).
-
-/* Interact with PokeCenter! */
-interactPcenter('HEAL'):-
-    update_all_poke_hp_to_max,
-    write('|    Nurse Joy: Here you go dear, I have recovered all of your pokemon to full HP!'),nl,nl.
-
-interactPcenter(_):-
-    write('|    Nurse Joy: Aww, alright then sweetie, have a great adventure!'),nl,nl.
-
-update_all_poke_hp_to_max :-
-    forall(
-        ( retract(curr_health(Index, Party, _)),
-          poke_stats(HP, _, _, _, Index, Party)
-        ),
-        assert(curr_health(Index, Party, HP))
-    ).
-
 /* Additional Information for Player and PokeCenter */
 print_info_p :-
     map(Matrix),
