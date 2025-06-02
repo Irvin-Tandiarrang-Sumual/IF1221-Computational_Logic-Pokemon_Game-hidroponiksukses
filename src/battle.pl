@@ -98,7 +98,11 @@ battle :-
     assertz(player_level(LevelKita)),
     retractall(myTurn),
     assertz(myTurn),
-/ *   quiz_pokemon(), */
+    random_between(1, 10, R),
+    (R >= 9 ->
+        statusLawan(_,_,_,_,NamaLawan,_),
+        quiz_pokemon(NamaLawan)
+    ),
     turn,
     retractall(cooldown_kita(_, _)),
     retractall(cooldown_lawan(_, _)),
