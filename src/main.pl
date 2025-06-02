@@ -48,7 +48,7 @@ exit :-
         retractall(legendary(_)),
         retractall(jml_inventory(_)),
         retractall(playerPos(_, _)),
-        retractall(poke_stats(_, _, _, _, _)),
+        retractall(poke_stats(_, _, _, _, _, _)),
         retractall(posisiPokemon(_, _, _)),
         retractall(battleNow(_)),
         retractall(isOnPoke(_)),

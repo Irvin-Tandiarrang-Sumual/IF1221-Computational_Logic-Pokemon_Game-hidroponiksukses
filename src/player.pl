@@ -29,14 +29,14 @@ starterToInventory(X, Y) :-
     asserta(inventory(X)), asserta(inventory(Y)),
     /* Setting stats for choosen starter 1 (X) */
     base_stats(HP1, ATK1, DEF1, X),
-    asserta(poke_stats(HP1, ATK1, DEF1, X, 1)),
+    asserta(poke_stats(HP1, ATK1, DEF1, X, 1, 1)),
     asserta(curr_health(1,1,HP1)),
     asserta(isSkillUsed_Self(1,0)),
     add_to_party(1, X),
     asserta(jml_inventory(1)),
     /* Setting stats for choosen starter 2 (Y) */
     base_stats(HP2, ATK2, DEF2, Y),
-    asserta(poke_stats(HP2, ATK2, DEF2, Y, 2)),
+    asserta(poke_stats(HP2, ATK2, DEF2, Y, 2, 1)),
     asserta(curr_health(2,1,HP2)),
     asserta(isSkillUsed_Self(2,0)),
     add_to_party(2, Y),
@@ -69,7 +69,7 @@ status :-
 showStatusList(L) :-
     L = [[No_invenH|H]|T],
     party(No_invenH,XH), No_invenH >  0,
-    poke_stats(HP, _, _, XH, No_invenH),
+    poke_stats(HP, _, _, XH, No_invenH, 1),
     pokemon(ID, XH, Rarity), rarity(Rarity, BaseEXP, _, _),
     type(Type,XH), level(Lev, XH, No_invenH, Exp),
     write('Name : '),
@@ -99,7 +99,7 @@ levelUp(X, No_inven) :-
 statsUp(Lev, X, No_inven, BaseEXP):-
     /* Taking old dynamic variable and remove it */
     retract(level(Lev, X, No_inven, Exp)),
-    retract(poke_stats(HP, ATK, DEF, X, No_inven)),
+    retract(poke_stats(HP, ATK, DEF, X, No_inven, Y)),
     /* Adding new dynamic variable */
     ExpCap is BaseEXP*Lev,
     NewExp is Exp - ExpCap,
@@ -108,7 +108,7 @@ statsUp(Lev, X, No_inven, BaseEXP):-
     ATK1 is ATK+1,
     HP1 is HP+2,
     DEF1 is DEF+1,
-    asserta(poke_stats(HP1, ATK1, DEF1, X, No_inven)),
+    asserta(poke_stats(HP1, ATK1, DEF1, X, No_inven, Y)),
     write('Your '),write(X),write(' has leveled up!'),nl,
     write('Health: '), write(HP1),nl,
     write('ATK: '), write(ATK1),nl,
