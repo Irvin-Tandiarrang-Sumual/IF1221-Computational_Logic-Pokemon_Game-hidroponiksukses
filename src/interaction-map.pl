@@ -57,12 +57,23 @@ move(_, _) :-
     fail.
 
 /* Player's movement */
-moveUp :- move(-2,0), mapping.
-moveLeft :- move(0,-2), mapping.
-moveDown :- move(2,0), mapping.
-moveRight :- move(0,2), mapping.
+moveUp :- move(-2,0), mapping, check_player_pokemon.
+moveLeft :- move(0,-2), mapping, check_player_pokemon.
+moveDown :- move(2,0), mapping, check_player_pokemon.
+moveRight :- move(0,2), mapping, check_player_pokemon.
 
 /* Currently: Replace the old tile with 0 */
 update_player_map(Matrix, (OldX, OldY), NewX, NewY, NewMatrix) :-
     replace_in_matrix(Matrix, (OldX, OldY), ' ', TempMatrix),
     replace_in_matrix(TempMatrix, (NewX, NewY), 'P', NewMatrix).
+
+check_player_pokemon :-
+    player_on_any_pokemon(Type, (X, Y)),
+    format("Kamu menemukan Pokemon rarity ~w!~n", [Type]), !.
+
+player_on_any_pokemon(Type, (PX, PY)) :-
+    map(Matrix),
+    nth0(PX, Matrix, Row),
+    nth0(PY, Row, 'P'),
+    pokemap(PokeList),
+    member((Type, (PX, PY)), PokeList).
