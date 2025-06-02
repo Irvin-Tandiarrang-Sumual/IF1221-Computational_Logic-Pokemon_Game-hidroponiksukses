@@ -4,8 +4,8 @@
 :- dynamic(listPoke/1).
 /* TODO */
 :- dynamic(idAv/1).
-/* no_inventory: (Inventory index (start from 1), Pokemon_name) */
-:- dynamic(no_inventory/2).
+/* party: (Inventory index (start from 1), Pokemon_name) */
+:- dynamic(party/2).
 /* TODO */
 :- dynamic(curr_health/2).
 /* TODO */
@@ -32,14 +32,14 @@ starterToInventory(X, Y) :-
     asserta(poke_stats(HP1, ATK1, DEF1, X, 1)),
     asserta(curr_health(1,HP1)),
     asserta(isSkillUsed_Self(1,0)),
-    asserta(no_inventory(1,X)),
+    add_to_party(1, X),
     asserta(jml_inventory(1)),
     /* Setting stats for choosen starter 2 (Y) */
     base_stats(HP2, ATK2, DEF2, Y),
     asserta(poke_stats(HP2, ATK2, DEF2, Y, 2)),
     asserta(curr_health(1,HP2)),
     asserta(isSkillUsed_Self(2,0)),
-    asserta(no_inventory(2,Y)),
+    add_to_party(2, Y),
     asserta(jml_inventory(2)),
     write(X), write(' & '), write(Y), write(' is now your partner!'),nl, !.
 
@@ -60,7 +60,7 @@ writeList([H|T]) :-
 /* initiating rint status of pokemon in inventory */
 status :-
     write('Your Pokemon:'), nl,
-    findall([N,X],no_inventory(N,X),ListInventory),
+    findall([N,X],party(N,X),ListInventory),
     /* Sorting by N (1-4) */
     sort(ListInventory,SortedList),
     showStatusList(SortedList). 
@@ -68,7 +68,7 @@ status :-
 /* Print status */
 showStatusList(L) :-
     L = [[No_invenH|H]|T],
-    no_inventory(No_invenH,XH), No_invenH >  0,
+    party(No_invenH,XH), No_invenH >  0,
     poke_stats(HP, _, _, XH, No_invenH),
     pokemon(ID, XH, Rarity), rarity(Rarity, BaseEXP, _, _),
     type(Type,XH), level(Lev, XH, No_invenH, Exp),
@@ -90,7 +90,7 @@ showStatusList(L) :-
 levelUp(X, No_inven) :- \+starter(X),!,fail.
 /* Procedure */
 levelUp(X, No_inven) :-
-    no_inventory(No_inven, X),
+    party(No_inven, X),
     pokemon(ID, X, Rarity), level(Lev,X, No_inven, Exp),
     rarity(Rarity, BaseEXP, _, _), !,
     Exp >= (BaseEXP*Lev), statsUp(Lev, X, No_inven, BaseEXP).
