@@ -7,8 +7,8 @@
 /* Initiating map and poke map */
 init_map(N, X):- generate_matrix(N, _), bushes(X), add_pokes, place_random_p, place_random_h.
 
-/* mapping; Print map to console */
-mapping :-
+/* showMap; Print map to console */
+showMap :-
     map(Matrix),
     print_matrix_rows(Matrix, 0).
 
