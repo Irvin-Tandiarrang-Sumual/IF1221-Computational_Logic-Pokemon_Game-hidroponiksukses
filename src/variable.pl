@@ -6,7 +6,6 @@
 :- dynamic(poke_stats/6).
 :- dynamic(posisiPokemon/3).
 :- dynamic(battleNow/1).
-:- dynamic(curr_health/3).
 :- dynamic(isOnPoke/1).
 :- dynamic(isBattle/1).
 :- dynamic(level/4).

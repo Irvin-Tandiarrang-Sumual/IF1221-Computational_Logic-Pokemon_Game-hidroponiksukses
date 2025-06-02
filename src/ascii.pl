@@ -232,12 +232,6 @@ pokemon_ascii(6):-
 
 pokemon_ascii(7) :-
     write('                                                  '), nl,
-    write('                                                  '), nl,
-    write('                                                  '), nl,
-    write('                                                  '), nl,
-    write('                                                  '), nl,
-    write('                                                  '), nl,
-    write('                                                  '), nl,
     write('                                       ......     '), nl,
     write('    .::--..                            .:---=:    '), nl,
     write('..:---+++*.       -==------*           .=-------. '), nl,
@@ -249,19 +243,10 @@ pokemon_ascii(7) :-
     write('     =:+--..===:+=------=+++++..                  '), nl,
     write('      .+----=.   .----+#*++*                      '), nl,
     write('       . ..       ..... .                         '), nl,
-    write('                                                  '), nl,
-    write('                                                  '), nl,
-    write('                                                  '), nl,
-    write('                                                  '), nl,
-    write('                                                  '), nl,
-    write('                                                  '), nl,
     write('                                                  '), nl.
 
 
 pokemon_ascii(8) :- 
-    write('                                                  '), nl,
-    write('                                                  '), nl,
-    write('                                                  '), nl,
     write('                                                  '), nl,
     write('                   @                               '), nl,
     write('                  @++***++++ =+++%                '), nl,
@@ -282,13 +267,10 @@ pokemon_ascii(8) :-
     write('      .+++++:::##@--------------:#%::++++=..      '), nl,
     write('       %-++::.        %=:-+@   @##@::++++@:       '), nl,
     write('                                      @#          '), nl,
-    write('                                                  '), nl,
-    write('                                                  '), nl,
     write('                                                  '), nl.
 
 
 pokemon_ascii(9) :- 
-    write('                                                  '), nl,
     write('                                                  '), nl,
     write('        :                                         '), nl,
     write('         -:                      ::::             '), nl,
@@ -312,8 +294,6 @@ pokemon_ascii(9) :-
     write('             - - ==+==*= .#++++++++#              '), nl,
     write('              @ @=@= :                            '), nl,
     write('                +*   =                            '), nl,
-    write('                                                  '), nl,
-    write('                                                  '), nl,
     write('                                                  '), nl.
 
 

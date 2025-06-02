@@ -35,14 +35,16 @@ use_pokeball :-
 catch_pokemon(Pokemon) :-
     party_slots_remaining(Remaining),
     (Remaining > 0 ->
-        add_to_party(Pokemon),
+        Idx is 5 - Remaining,
+        add_to_party(Idx, Pokemon),
         format('~w tertangkap dan masuk ke party!~n', [Pokemon])
     ;
         (   item_inventory(Index, pokeball(empty)) ->
             retract(item_inventory(Index, pokeball(empty))),
             assertz(item_inventory(Index, pokeball(filled(Pokemon)))),
             format('~w tertangkap dan disimpan di Poké Ball slot ~w~n', [Pokemon, Index])
-        ;   format('Tidak ada Poke Ball kosong! Gagal menangkap ~w~n', [Pokemon]), fail
+        ;   
+            format('Tidak ada Poke Ball kosong! Gagal menangkap ~w~n', [Pokemon]), fail
         )
     ).
 
