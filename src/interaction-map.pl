@@ -54,7 +54,7 @@ move(DX, DY) :-
     retract(remaining_moves(_)), assertz(remaining_moves(NewMovesLeft)),
     /* Print current moves left */
     format("Moves left: ~d~n", [NewMovesLeft]),
-    write('HP Pokemon dipulihkan sebanyak 20% dari total max HP masing-masing.').
+    write('HP Pokemon dipulihkan sebanyak 20% dari total max HP masing-masing.'), nl.
 
 move(_, _) :-
     remaining_moves(0),
@@ -62,10 +62,10 @@ move(_, _) :-
     fail.
 
 /* Player's movement */
-moveUp :- write('Kamu bergerak ke atas'), move(-2,0), check_player_pokemon, showMap.
-moveLeft :- write('Kamu bergerak ke kiri'), move(0,-2), check_player_pokemon, showMap.
-moveDown :- write('Kamu bergerak ke bawah'), move(2,0), check_player_pokemon, showMap.
-moveRight :- write('Kamu bergerak ke kanan'), move(0,2), check_player_pokemon, showMap.
+moveUp :- write('Kamu bergerak ke atas'), move(-2,0), check_player_pokemon.
+moveLeft :- write('Kamu bergerak ke kiri'), move(0,-2), check_player_pokemon.
+moveDown :- write('Kamu bergerak ke bawah'), move(2,0), check_player_pokemon.
+moveRight :- write('Kamu bergerak ke kanan'), move(0,2), check_player_pokemon.
 
 /* Currently: Replace the old tile with 0 */
 update_player_map(Matrix, (OldX, OldY), NewX, NewY, NewMatrix) :-
@@ -79,27 +79,62 @@ check_player_pokemon :-
     (last_player_tile('#') ->
         write('Kamu memasuki semak-semak!'), nl, 
         (
-            member((Type, (PX, PY)), PokeList) ->
-                format("Kamu menemukan Pokemon rarity ~w! pilih opsi: ~n", [Type]),
-                write('1.   Bertarung'), nl, write('2.   Tangkap'), nl, write('3.   Kabur(NOOB)'), nl,
-                write('>> '), read(Pilihan)
+            member((Rarity, (PX, PY)), PokeList) ->
+                format("Kamu menemukan Pokemon rarity ~w! pilih opsi: ~n", [Rarity]),
+                write('1.   Bertarung'), nl, write('2.   Tangkap'), nl, write('3.   Kabur(NOOB)'), nl, showMap, 
+                write('>> '), read(Pilihan), handle_encounter_choice(Pilihan, Rarity, (PX, PY))
             ;
-                write('Sepertinya tidak ada tanda-tanda kehidupan disini...'), nl
+                write('Sepertinya tidak ada tanda-tanda kehidupan disini...'), nl, showMap
         )
     ;
         (
-            member((Type, (PX, PY)), PokeList) ->
-                format("Kamu menemukan Pokemon rarity ~w! pilih opsi: ~n", [Type]),
-                write('1.   Bertarung'), nl, write('2.   Tangkap'), nl, write('3.   Kabur(NOOB)'), nl,
-                write('>> '), read(Pilihan)
+            member((Rarity, (PX, PY)), PokeList) ->
+                format("Kamu menemukan Pokemon rarity ~w! pilih opsi: ~n", [Rarity]),
+                write('1.   Bertarung'), nl, write('2.   Tangkap'), nl, write('3.   Kabur(NOOB)'), nl, showMap,
+                write('>> '), read(Pilihan), handle_encounter_choice(Pilihan, Rarity, (PX, PY))
             ;
-                true
+                showMap, true
         )
      ).
 
-player_on_any_pokemon(Type, (PX, PY)) :-
+handle_encounter_choice(1, _, _) :-
+    write('Persiapkan dirimu!'), nl,
+    write('Pertarungan yang epik baru saja dimulai!'), nl,
+    battle.
+
+handle_encounter_choice(2, Rarity, Pos) :-
+    write('Kamu memilih menangkap pokemon'), nl,
+    catch_rate(Rarity, RateBase),
+    random_between(0, 35, Rnd),
+    CatchRate is RateBase + Rnd,
+    write('Hasil catch rate: '), write(CatchRate), nl,
+    ( CatchRate > 50 ->
+        write('Kamu berhasil menangkap pokemon!'), nl,
+        /*catch_pokemon()*/
+        remove_pokemon_from_map(Pos)
+    ; 
+        write('Kamu gagal menangkap pokemon!'), nl,
+        write('Persiapkan dirimu! Pertarungan yang epik baru saja dimulai!'), nl,
+        battle ).
+
+handle_encounter_choice(3, _, _) :-
+    write('Kamu memilih kabur!'), nl,
+    write('Skill issue.'), nl.
+
+handle_encounter_choice(X, Rarity, Pos) :- \+ member(X, [1, 2, 3]),
+    write('Pilihan tidak valid, coba lagi.'), nl,
+    write('>> '), read(NewChoice),
+    handle_encounter_choice(NewChoice, Rarity, Pos).
+
+player_on_any_pokemon(Rarity, (PX, PY)) :-
     map(Matrix),
     nth0(PX, Matrix, Row),
     nth0(PY, Row, 'P'),
     pokemap(PokeList),
-    member((Type, (PX, PY)), PokeList).
+    member((Rarity, (PX, PY)), PokeList).
+
+remove_pokemon_from_map(Pos) :-
+    pokemap(PokeList),
+    delete(PokeList, (_, Pos), NewList),
+    retractall(pokemap(_)),
+    assertz(pokemap(NewList)).
