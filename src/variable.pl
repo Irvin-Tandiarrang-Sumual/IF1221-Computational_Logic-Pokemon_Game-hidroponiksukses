@@ -110,7 +110,7 @@ skill(bubble, water, 30, lower_atk(3), 1.0).
 skill(thunder_shock, electric, 40, paralyze, 0.2).
 skill(quick_attack, normal, 30, none, 0).
 skill(rock_throw, rock, 50, none, 0).
-skill(rest, normal, 0, heal(0.4), 1.0).
+skill(rest, normal, 0, [heal(1.0), sleep(2)], 1.0).
 skill(ice_shard, ice, 40, none, 0).
 skill(psychic_blast, psychic, 25, paralyze, 0.2).
 skill(mind_shock, psychic, 20, area, 1.0).

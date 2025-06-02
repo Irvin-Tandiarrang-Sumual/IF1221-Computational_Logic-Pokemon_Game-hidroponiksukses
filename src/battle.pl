@@ -109,13 +109,32 @@ turn :-
     situation(ongoing), !,
     apply_turn_effects,
     reset_defend,
-    ( myTurn ->
-        statusKita(CurHP, _, _, _, Name, _),
-        cekBattleStatus(Name, CurHP)
-    ;
-        statusLawan(CurHP, _, _, _, Name, _),
-        cekBattleStatus(Name, CurHP),
-        enemy_action
+    (
+        myTurn ->
+            (
+                statusEfekKita(sleep(T)), T > 0 ->
+                    NewT is T - 1,
+                    retract(statusEfekKita(sleep(T))),
+                    (NewT > 0 -> assertz(statusEfekKita(sleep(NewT))) ; true),
+                    statusKita(CurHP, _, _, _, Name, _),
+                    write(Name), write(' sedang tidur... turn dilewati.'), nl
+            ;
+                statusKita(CurHP, _, _, _, Name, _),
+                cekBattleStatus(Name, CurHP)
+            )
+        ;
+            (
+                statusEfekLawan(sleep(T)), T > 0 ->
+                    NewT is T - 1,
+                    retract(statusEfekLawan(sleep(T))),
+                    (NewT > 0 -> assertz(statusEfekLawan(sleep(NewT))) ; true),
+                    statusLawan(CurHP, _, _, _, Name, _),
+                    write(Name), write(' sedang tidur... turn dilewati.'), nl
+            ;
+                statusLawan(CurHP, _, _, _, Name, _),
+                cekBattleStatus(Name, CurHP),
+                enemy_action
+            )
     ),
     toggle_turn,
     true.
@@ -274,6 +293,16 @@ apply_ability(heal(Ratio), _) :-
     retract(statusKita(CurHP, MaxHP, ATK, DEF, Nama, ID)),
     assertz(statusKita(NewHP, MaxHP, ATK, DEF, Nama, ID)),
     write(Nama), write(' memulihkan '), write(Heal), write(' HP!'), nl.
+apply_ability(sleep(Turns), _) :-
+    ( myTurn ->
+        assertz(statusEfekLawan(sleep(Turns))),
+        statusLawan(_,_,_,_,Nama,_)
+    ;
+        assertz(statusEfekKita(sleep(Turns))),
+        statusKita(_,_,_,_,Nama,_)
+    ),
+    write('Efek sleep diterapkan ke '), write(Nama),
+    write('! Akan tertidur selama '), write(Turns), write(' turn.'), nl.
 
 % ----------------------
 % Fakta Dinamis
