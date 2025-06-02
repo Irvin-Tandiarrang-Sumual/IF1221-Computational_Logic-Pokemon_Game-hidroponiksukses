@@ -16,6 +16,7 @@
 :- include('battle.pl').
 :- include('inventory.pl').
 :- include('end-game.pl').
+:- include('side-quest.pl').
 
 /* Start game*/
 start :-
