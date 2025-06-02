@@ -8,6 +8,7 @@
 :- dynamic(statusEfekLawan/1).
 :- dynamic(cooldown_kita/2).
 :- dynamic(cooldown_lawan/2).
+:- dynamic(player_level/1).
 
 
 random_between(Low, High, R) :-
@@ -93,6 +94,8 @@ battle :-
     DEFKita is DEFBase + 1 * LevelKita,
     retractall(statusKita(_,_,_,_,_,_)),
     assertz(statusKita(MaxHPKita, MaxHPKita, ATKKita, DEFKita, pikachu, 1)),
+    retractall(player_level(_)), /* tract lvl */
+    assertz(player_level(LevelKita)),
     retractall(myTurn),
     assertz(myTurn),
     turn,
@@ -311,6 +314,7 @@ reduce_cooldown :-
 
 % Burn Effect
 apply_burn(ID) :-
+    \+ immune_status(ID), 
     efek_pokemon(ID, burn(T, D)),
     status_pokemon(ID, CurHP, MaxHP, ATK, DEF, Nama),
     NewHP is max(0, CurHP - D),
@@ -324,6 +328,7 @@ apply_burn(_).  % fallback bila tidak ada efek burn
 
 % Paralyze Effect
 apply_paralyze(ID) :-
+    \+ immune_status(ID), 
     efek_pokemon(ID, paralyze),
     random_float(X),
     ( X < 0.2 ->
@@ -367,3 +372,4 @@ enemy_use_skill(NamaSkill) :-
     damage_skill(Power),
     apply_ability(Ability, Chance),
     turn.
+

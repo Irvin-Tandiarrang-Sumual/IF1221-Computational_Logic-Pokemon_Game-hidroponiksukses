@@ -93,7 +93,7 @@ created_by:-
     write('|                               Created by'), nl, nl,
     write('|                               Irvin Tandiarrang S          (NIM: 13524030)'), nl,
     write('|                               Bernhard Aprillio Pramana    (NIM: 13524074)'), nl,
-    write('|                               Moreno Syawali Ganda Sugita  (NIM: 1352096)'), nl,
+    write('|                               Moreno Syawali Ganda Sugita  (NIM: 13524096)'), nl,
     write('|                               Jennifer Khang               (NIM: 13524110)'), nl,
     write('|                               Nathaniel Christian          (NIM: 13524122)'), nl.
 

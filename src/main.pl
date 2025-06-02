@@ -15,40 +15,53 @@
 :- include('map.pl').
 :- include('battle.pl').
 :- include('inventory.pl').
+:- include('end-game.pl').
 
-/* kondisi: gamestarted */
-start:- init, write('Game already started'),!.
-/* kondisi: game not started */
-start:- \+init, assertz(init), init_moves(20), assertz(player(ash, 0, 0, 0, 0, 0, 0)), title, created_by, startgame(0).
+/* Start game*/
+start :-
+    ( current_predicate(init/0), init ->
+        write('Game already started.'), nl
+    ;
+        init_starter, 
+        assertz(init),
+        init_moves(20),
+        assertz(player(ash, 0, 0, 0, 0, 0, 0)),
+        title, created_by, startgame(0)
+    ).
 
-exit:- init, retractall(init),
-    retractall(player(_, _, _, _, _, _, _)),
-    retractall(init_moves(_)),
-    retractall(remaining_moves(_)),
-    retractall(map(_)),
-    retractall(last_player_tile(_)),
-    retractall(pokemap(_)),
-    retractall(listPoke(_)),
-    retractall(idAv(_)),
-    retractall(no_inventory(_, _)),
-    retractall(curr_health(_, _)),
-    retractall(isSkillUsed_Self(_, _)),
-    retractall(isHeal(_)),
-    retractall(inventory(_)),
-    retractall(legendary(_)),
-    retractall(jml_inventory(_)),
-    retractall(playerPos(_, _)),
-    retractall(base_stats(_, _, _, _)),
-    retractall(poke_stats(_, _, _, _, _)),
-    retractall(posisiPokemon(_, _, _)),
-    retractall(battleNow(_)),
-    retractall(isOnPoke(_)),
-    retractall(isBattle(_)),
-    retractall(level(_, _, _, _)),
-    retractall(skill(_, _, _, _, _)),
-    retractall(health(_, _)).
-
-exit:- \+init, write('Game is not started'),!.
+exit :-
+    ( current_predicate(init/0), init ->
+        retractall(init),
+        retractall(player(_, _, _, _, _, _, _)),
+        init_moves(0),
+        retractall(remaining_moves(_)),
+        retractall(map(_)),
+        retractall(last_player_tile(_)),
+        retractall(pokemap(_)),
+        retractall(listPoke(_)),
+        retractall(idAv(_)),
+        retractall(no_inventory(_, _)),
+        retractall(curr_health(_, _)),
+        retractall(isSkillUsed_Self(_, _)),
+        retractall(isHeal(_)),
+        retractall(inventory(_)),
+        retractall(legendary(_)),
+        retractall(jml_inventory(_)),
+        retractall(playerPos(_, _)),
+        retractall(poke_stats(_, _, _, _, _)),
+        retractall(posisiPokemon(_, _, _)),
+        retractall(battleNow(_)),
+        retractall(isOnPoke(_)),
+        retractall(isBattle(_)),
+        retractall(level(_, _, _, _)),
+        retractall(skill(_, _, _, _, _)),
+        retractall(health(_, _)),
+        retractall(party(_)),
+        retractall(item_inventory(_)),
+        write('Game exited successfully.'), nl
+    ;
+        write('Game is not started.'), nl
+    ).
 
 /* update_name: input name and change the dynamic variable */
 update_name(NewName):- player(_, Poke1, Poke2, Poke3, Poke4, X_pos, Y_pos),
@@ -77,7 +90,7 @@ step(6) :- write('|    Others use them for fights.').
 step(7) :- write('|    Myself...').
 step(8) :- write('|    I study POKeMON as a profession.').
 step(9) :- set_name, wait_enter. 
-step(10) :- starter_pokemon, init_map(17,32).
+step(10) :- starter_pokemon, initialize_inventory, init_map(17,32).
 
 /* wait_enter: press ENTER to continue */
 wait_enter :- get_char(_), nl.

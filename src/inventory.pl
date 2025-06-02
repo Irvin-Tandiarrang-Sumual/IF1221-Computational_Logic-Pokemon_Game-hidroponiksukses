@@ -1,5 +1,7 @@
 :- dynamic(item_inventory/1).
 
+max_party_size(4).
+
 /* Inisialisasi inventori */
 initialize_inventory :-
     length(InitialItems, 40),
@@ -49,14 +51,21 @@ use_pokeball :-
 
 /* Menangkap Pokémon */
 catch_pokemon(Pokemon) :-
-    item_inventory(Inventory),
-    (   nth0(Index, Inventory, pokeball(empty)) ->
-        replace_nth(Index, Inventory, pokeball(filled(Pokemon)), NewInventory),
-        retract(item_inventory(Inventory)),
-        assertz(item_inventory(NewInventory)),
-        write(Pokemon), write(' tertangkap dan disimpan di slot '), write(Index), nl
-    ;   write('Tidak ada Poké Ball kosong!'), nl
+    party_slots_remaining(Remaining),
+    (Remaining > 0 ->
+        add_to_party(Pokemon),
+        write(Pokemon), write(' tertangkap dan masuk ke party!'), nl
+    ;   
+        item_inventory(Inventory),
+        (   nth0(Index, Inventory, pokeball(empty)) ->
+            replace_nth(Index, Inventory, pokeball(filled(Pokemon)), NewInventory),
+            retract(item_inventory(Inventory)),
+            assertz(item_inventory(NewInventory)),
+            write(Pokemon), write(' tertangkap dan disimpan di Poke Ball slot '), write(Index), nl
+        ;   write('Tidak ada Poke Ball kosong! Gagal menangkap '), write(Pokemon), nl, fail
+        )
     ).
+
 
 /* Menampilkan inventori */
 show_bag :-
@@ -98,3 +107,25 @@ random_member(Item, List) :-
     length(List, Length),
     random(0, Length, Index),
     nth0(Index, List, Item).
+
+
+add_to_party(X, Pokemon) :-
+    findall(P, party(_, P), List),
+    length(List, Len),
+    max_party_size(Max),
+    (Len < Max ->
+        assertz(party(X, Pokemon)),
+        format('~w telah ditambahkan ke party.~n', [Pokemon]);
+        write('Party penuh! Tidak bisa menambahkan Pokemon lagi.'), nl, fail).
+
+show_party :-
+    write('=== Pokemon di Party ==='), nl,
+    (party(_, _) ->
+        forall(party(_, P), format('- ~w~n', [P]));
+        write('Party kosong.'), nl).
+
+party_slots_remaining(Remaining) :-
+    findall(P, party(_, P), List),
+    length(List, Len),
+    max_party_size(Max),
+    Remaining is Max - Len.

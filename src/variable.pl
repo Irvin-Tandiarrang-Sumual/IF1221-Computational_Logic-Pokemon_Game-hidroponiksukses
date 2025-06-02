@@ -25,6 +25,7 @@ pokemon(6, pikachu, rare).
 pokemon(7, geodude, rare).
 pokemon(8, snorlax, epic).
 pokemon(9, articuno, legendary).
+pokemon(10, mewtwo, legendary).
 
 /* Type */
 /* type(Type, Nama_pokemon) */
@@ -59,12 +60,11 @@ base_stats(40, 12, 15, squirtle).
 base_stats(35, 15, 10, charmeleon).
 base_stats(40, 12, 15, wartortle).
 base_stats(250, 300, 250, wartortle).
+base_stats(250, 300, 250, mewtwo).
 
 /* level Pokemon */
 /* level(Level, Nama_pokemon, Slot_Inventory, EXP_Counter) */
-level(5,pidgey,0, 0).
-level(5,charmander,0, 0).
-level(5,squirtle,0, 0).
+init_starter:- asserta(level(1,pidgey,0, 0)), asserta(level(1,charmander,0, 0)), asserta(level(1,squirtle,0, 0)).
 
 /* Poke stats */
 /* poke_stats(HP, ATK, DEF, Nama_pokemon, Slot_Inventory) */
@@ -117,6 +117,10 @@ skill(mind_shock, psychic, 20, area, 1.0).
 
 isOnPoke(0).
 isBattle(0).
+
+/* special trait mewtwo dengan id 10*/
+/* immune_status(id pokemon) */
+immune_status(10).
 
 /* Rarity */
 /* rarity(Rarity, BaseEXP, BaseEXPGiven, CatchRate) */
