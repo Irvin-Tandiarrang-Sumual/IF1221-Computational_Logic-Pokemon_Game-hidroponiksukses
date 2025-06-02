@@ -135,7 +135,7 @@ check_player_pokemon :-
 handle_encounter_choice(1, Rarity, _) :-
     write('Persiapkan dirimu!'), nl,
     write('Pertarungan yang epik baru saja dimulai!'), nl,
-    battle(Rarity).
+    battle(Rarity), remove_pokemon_from_map(Pos).
 
 handle_encounter_choice(2, Rarity, Pos) :-
     write('Kamu memilih menangkap pokemon'), nl,
@@ -146,11 +146,13 @@ handle_encounter_choice(2, Rarity, Pos) :-
     ( CatchRate > 50 ->
         write('Kamu berhasil menangkap pokemon!'), nl,
         pokeRandomizer(Rarity, Nama),
-        catch_pokemon(Nama)
+        catch_pokemon(Nama),
+        remove_pokemon_from_map(Pos)
     ; 
         write('Kamu gagal menangkap pokemon!'), nl,
         write('Persiapkan dirimu! Pertarungan yang epik baru saja dimulai!'), nl,
-        battle(Rarity)
+        battle(Rarity),
+        remove_pokemon_from_map(Pos)
     ).
 
 handle_encounter_choice(3, _, _) :-

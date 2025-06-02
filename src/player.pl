@@ -24,7 +24,7 @@ chooseStarter:-  findall(X,starter(X),ListStarter),
 /* Putting starter to inventory */
 starterToInventory(X, Y) :- 
     /* Adding choosen starter as new level dynamic variable */
-    starter(X), starter(Y), level(Lev,X, 0, 0), asserta(level(Lev,X, 1, 0)), level(Lev,Y, 0, 0), asserta(level(Lev,Y, 2, 0)),
+    starter(X), starter(Y), level(Lev,X, 0, 0, 0), asserta(level(Lev,X, 1, 0, 0)), level(Lev,Y, 0, 0, 0), asserta(level(Lev,Y, 2, 0, 0)),
     /* Adding choosen starter's name to inventory */
     asserta(inventory(X)), asserta(inventory(Y)),
     /* Setting stats for choosen starter 1 (X) */
@@ -71,7 +71,7 @@ showStatusList(L) :-
     party(No_invenH,XH), No_invenH >  0,
     poke_stats(HP, _, _, XH, No_invenH, 1),
     pokemon(ID, XH, Rarity), rarity(Rarity, BaseEXP, _, _),
-    type(Type,XH), level(Lev, XH, No_invenH, Exp),
+    type(Type,XH), level(Lev, XH, No_invenH, Exp, Boolean_party),
     write('Name : '),
     write(XH),nl,
     write('Health: '),
@@ -91,20 +91,20 @@ levelUp(X, No_inven) :- \+starter(X),!,fail.
 /* Procedure */
 levelUp(X, No_inven) :-
     party(No_inven, X),
-    pokemon(ID, X, Rarity), level(Lev,X, No_inven, Exp),
+    pokemon(ID, X, Rarity), level(Lev,X, No_inven, Exp, Boolean_party),
     rarity(Rarity, BaseEXP, _, _), !,
     Exp >= (BaseEXP*Lev), statsUp(Lev, X, No_inven, BaseEXP).
 
 /* Changing the level and stats, reduce CurrentEXP by EXPCap */
 statsUp(Lev, X, No_inven, BaseEXP):-
     /* Taking old dynamic variable and remove it */
-    retract(level(Lev, X, No_inven, Exp)),
+    retract(level(Lev, X, No_inven, Exp, Boolean_party)),
     retract(poke_stats(HP, ATK, DEF, X, No_inven, Y)),
     /* Adding new dynamic variable */
     ExpCap is BaseEXP*Lev,
     NewExp is Exp - ExpCap,
     NewLev is Lev+1,
-    asserta(level(NewLev, X, No_inven, NewExp)),
+    asserta(level(NewLev, X, No_inven, NewExp, Boolean_party)),
     ATK1 is ATK+1,
     HP1 is HP+2,
     DEF1 is DEF+1,

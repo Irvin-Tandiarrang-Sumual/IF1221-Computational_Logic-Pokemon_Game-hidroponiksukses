@@ -53,7 +53,7 @@ exit :-
         retractall(battleNow(_)),
         retractall(isOnPoke(_)),
         retractall(isBattle(_)),
-        retractall(level(_, _, _, _)),
+        retractall(level(_, _, _, _, _)),
         retractall(skill(_, _, _, _, _)),
         retractall(health(_, _)),
         retractall(party(_)),

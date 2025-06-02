@@ -34,13 +34,25 @@ use_pokeball :-
 /* Menangkap Pokémon */
 catch_pokemon(Pokemon) :-
     party_slots_remaining(Remaining),
+    LevelMin is min(14, max(2, round(2 + (20 - Remaining) / 2))),
+    LevelMax is min(14, max(LevelMin, round(4 + (20 - Remaining) / 1.5))),
+    random_between(LevelMin, LevelMax, Level),
+    base_stats(HPBase, ATKBase, DEFBase, Pokemon),
+    HP is HPBase + 2 * Level,
+    ATK is ATKBase + 1 * Level,
+    DEF is DEFBase + 1 * Level,
+    Leve1 is Level + 1,
     (Remaining > 0 ->
-        Idx is 5 - Remaining,
+        Idx is 5 - Remaining, 
+        asserta(poke_stats(HP, ATK, DEF, Pokemon, Idx, 1)),
+        asserta(level(Leve1, Pokemon, Idx, 0, 1)), 
         add_to_party(Idx, Pokemon),
         format('~w tertangkap dan masuk ke party!~n', [Pokemon])
     ;
         (   item_inventory(Index, pokeball(empty)) ->
             retract(item_inventory(Index, pokeball(empty))),
+            asserta(poke_stats(HP, ATK, DEF, Pokemon, Index, 0)),
+            asserta(level(Leve1, Pokemon, Index, 0, 0)), 
             assertz(item_inventory(Index, pokeball(filled(Pokemon)))),
             format('~w tertangkap dan disimpan di Poké Ball slot ~w~n', [Pokemon, Index])
         ;   
