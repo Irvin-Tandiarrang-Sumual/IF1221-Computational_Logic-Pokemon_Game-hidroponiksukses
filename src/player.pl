@@ -24,7 +24,7 @@ chooseStarter:-  findall(X,starter(X),ListStarter),
 /* Putting starter to inventory */
 starterToInventory(X, Y) :- 
     /* Adding choosen starter as new level dynamic variable */
-    starter(X), starter(Y), level(Lev,X, 0, 0, 0), asserta(level(Lev,X, 1, 0, 0)), level(Lev,Y, 0, 0, 0), asserta(level(Lev,Y, 2, 0, 0)),
+    starter(X), starter(Y), level(Lev,X, 0, 0, 0), asserta(level(Lev,X, 1, 0, 1)), level(Lev,Y, 0, 0, 0), asserta(level(Lev,Y, 2, 0, 1)),
     /* Adding choosen starter's name to inventory */
     asserta(inventory(X)), asserta(inventory(Y)),
     /* Setting stats for choosen starter 1 (X) */
@@ -65,33 +65,29 @@ status :-
     sort(ListInventory,SortedList),
     showStatusList(SortedList). 
 
+showStatusList([]) :- !.
 /* Print status */
-showStatusList(L) :-
-    L = [[No_invenH|H]|T],
-    party(No_invenH,XH), No_invenH >  0,
-    poke_stats(HP, _, _, XH, No_invenH, 1),
-    pokemon(ID, XH, Rarity), rarity(Rarity, BaseEXP, _, _),
-    type(Type,XH), level(Lev, XH, No_invenH, Exp, Boolean_party),
-    write('Name : '),
-    write(XH),nl,
-    write('Health: '),
-    write(HP),nl,
-    write('Type: '),
-    write(Type), nl,
-    write('Level: '),
-    write(Lev), nl,
-    write('Exp: '),
-    ExpCap is BaseEXP*Lev,
-    write(Exp), write('/'), write(ExpCap), nl, nl,
-    showStatusList(T),!.
+showStatusList([[No_invenH, XH]|T]) :-
+    No_invenH > 0,
+    party(No_invenH, XH),      % Jika predicate party dipakai seperti ini
+    poke_stats(HP, _, _, _, No_invenH, 1),
+    pokemon(_, XH, Rarity),
+    rarity(Rarity, BaseEXP, _, _),
+    type(Type, XH),
+    level(Lev, XH, No_invenH, Exp, 1),
+    write('Name : '), write(XH), nl,
+    write('Health: '), write(HP), nl,
+    write('Type: '), write(Type), nl,
+    write('Level: '), write(Lev), nl,
+    ExpCap is BaseEXP * Lev,
+    write('Exp: '), write(Exp), write('/'), write(ExpCap), nl, nl,
+    showStatusList(T).
 
 /* Level up X at No_inven */
-/* Basis */
-levelUp(X, No_inven) :- \+starter(X),!,fail.
 /* Procedure */
 levelUp(X, No_inven) :-
     party(No_inven, X),
-    pokemon(ID, X, Rarity), level(Lev,X, No_inven, Exp, Boolean_party),
+    pokemon(ID, X, Rarity), level(Lev,X, No_inven, Exp, _),
     rarity(Rarity, BaseEXP, _, _), !,
     Exp >= (BaseEXP*Lev), statsUp(Lev, X, No_inven, BaseEXP).
 
@@ -104,12 +100,25 @@ statsUp(Lev, X, No_inven, BaseEXP):-
     ExpCap is BaseEXP*Lev,
     NewExp is Exp - ExpCap,
     NewLev is Lev+1,
-    asserta(level(NewLev, X, No_inven, NewExp, Boolean_party)),
+    assertz(level(NewLev, X, No_inven, NewExp, Boolean_party)),
     ATK1 is ATK+1,
     HP1 is HP+2,
     DEF1 is DEF+1,
-    asserta(poke_stats(HP1, ATK1, DEF1, X, No_inven, Y)),
+    assertz(poke_stats(HP1, ATK1, DEF1, X, No_inven, Y)),
     write('Your '),write(X),write(' has leveled up!'),nl,
     write('Health: '), write(HP1),nl,
     write('ATK: '), write(ATK1),nl,
     write('DEF: '), write(DEF1),nl,!.
+
+addExp(X, Idx, Nama) :- 
+    level(Lev,Nama,Idx, Exp, 1),
+    retract(level(Lev,Nama,Idx, Exp, 1)),
+    Expnew is Exp + X, 
+    assertz(level(Lev,Nama,Idx, Expnew, 1)),
+    pokemon(_, Nama, Rarity),
+    isLevelUp(Rarity,Lev, Expnew, Nama, Idx).
+
+isLevelUp(Rarity, Lev, Counter, Nama, Idx) :-
+    rarity(Rarity, BaseEXP, _, _),
+    Counter >= BaseEXP * Lev,
+    ( levelUp(Nama, Idx) -> true ; true ).

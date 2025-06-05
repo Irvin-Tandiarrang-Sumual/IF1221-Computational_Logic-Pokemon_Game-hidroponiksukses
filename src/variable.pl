@@ -96,22 +96,22 @@ notEffective(ice, water).
 notEffective(ice, ice).
 notEffective(normal, rock).
 
-/* Skill */
-/* skill(Nama_skill, Type, Power, Ability, Ability_chance) */
-skill(tackle, normal, 35, none, 0).
-skill(scratch, normal, 35, none, 0).
-skill(ember, fire, 40, burn(2, 3), 1.0).
-skill(water_gun, water, 40, none, 0).
-skill(gust, flying, 30, none, 0).
-skill(fire_spin, fire, 35, burn(2, 5), 1.0).
-skill(bubble, water, 30, lower_atk(3), 1.0).
-skill(thunder_shock, electric, 40, paralyze, 0.2).
-skill(quick_attack, normal, 30, none, 0).
-skill(rock_throw, rock, 50, none, 0).
-skill(rest, normal, 0, [heal(1.0), sleep(2)], 1.0).
-skill(ice_shard, ice, 40, none, 0).
-skill(psychic_blast, psychic, 25, paralyze, 0.2).
-skill(mind_shock, psychic, 20, area, 1.0).
+/* skills */
+/* skills(Nama_skills, Type, Power, Ability, Ability_chance) */
+skills(tackle, normal, 35, none, 0).
+skills(scratch, normal, 35, none, 0).
+skills(ember, fire, 40, burn(2, 3), 1.0).
+skills(water_gun, water, 40, none, 0).
+skills(gust, flying, 30, none, 0).
+skills(fire_spin, fire, 35, burn(2, 5), 1.0).
+skills(bubble, water, 30, lower_atk(3), 1.0).
+skills(thunder_shock, electric, 40, paralyze, 0.2).
+skills(quick_attack, normal, 30, none, 0).
+skills(rock_throw, rock, 50, none, 0).
+skills(rest, normal, 0, [heal(1.0), sleep(2)], 1.0).
+skills(ice_shard, ice, 40, none, 0).
+skills(psychic_blast, psychic, 25, paralyze, 0.2).
+skills(mind_shock, psychic, 20, area, 1.0).
 
 isOnPoke(0).
 isBattle(0).
@@ -131,3 +131,14 @@ catch_rate(common, 40).
 catch_rate(rare, 30).
 catch_rate(epic, 25).
 catch_rate(legendary, 10).
+
+% pokeSkill(Nama, Skill1, Skill2)
+pokeSkill(charmander, scratch, ember).
+pokeSkill(squirtle, tackle, water_gun).
+pokeSkill(pidgey, tackle, gust).
+pokeSkill(charmeleon, ember, fire_spin).
+pokeSkill(wartortle, water_gun, bubble).
+pokeSkill(pikachu, thunder_shock, quick_attack).
+pokeSkill(geodude, tackle, rock_throw).
+pokeSkill(snorlax, tackle, rest).
+pokeSkill(articuno, gust, ice_shard).

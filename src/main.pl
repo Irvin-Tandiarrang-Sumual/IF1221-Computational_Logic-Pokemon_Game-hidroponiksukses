@@ -27,7 +27,7 @@ start :-
         assertz(init),
         init_moves(20),
         assertz(player(ash, 0, 0, 0, 0, 0, 0)),
-        title, created_by, startgame(0)
+        title, created_by, startgame(10)
     ).
 
 exit :-
