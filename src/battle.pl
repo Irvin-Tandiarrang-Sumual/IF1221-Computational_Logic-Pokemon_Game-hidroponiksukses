@@ -161,9 +161,10 @@ turn :-
         ignore((party(1, Nama1), addExp(X, 1, Nama1))),
         ignore((party(2, Nama2), addExp(X, 2, Nama2))),
         ignore((party(3, Nama3), addExp(X, 3, Nama3))),
-        ignore((party(4, Nama4), addExp(X, 4, Nama4)))
+        ignore((party(4, Nama4), addExp(X, 4, Nama4))),
+        retract(1,1,_)
     ; myTurn ->
-        handle_player_turn, nl
+        nl, handle_player_turn, nl
     ; handle_enemy_turn
     ).
 
