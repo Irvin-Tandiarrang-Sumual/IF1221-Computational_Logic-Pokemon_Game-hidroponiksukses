@@ -10,7 +10,7 @@
 :- dynamic(isHeal/1).
 
 /* Initiating to choose starter */
-chooseStarter:-  findall(NamaX,starter(X, NamaX),ListStarter),
+chooseStarter:-  findall(NamaX,starter(_, NamaX),ListStarter),
     retractall(curr_health(_, _, _, _)),
     writeList(ListStarter),
     repeat,
@@ -90,7 +90,7 @@ showStatusList([[No_invenH, XH]|T]) :-
 /* Procedure */
 levelUp(X, No_inven) :-
     party(No_inven, X),
-    pokemon(ID, X, Rarity), level(Lev,X, No_inven, Exp, _),
+    pokemon(_, X, Rarity), level(Lev,X, No_inven, Exp, _),
     rarity(Rarity, BaseEXP, _, _), !,
     Exp >= (BaseEXP*Lev), statsUp(Lev, X, No_inven, BaseEXP),
     addExp(0, No_inven, X).

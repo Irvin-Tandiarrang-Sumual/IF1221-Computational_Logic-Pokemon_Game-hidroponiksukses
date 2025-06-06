@@ -72,7 +72,7 @@ moveRight :- \+ situation(ongoing), write('Kamu bergerak ke kanan'), nl, move(0,
 
 /* PokeCenter's interaction feature */
 
-pcenter :- pcenter_step(X).
+pcenter :- pcenter_step(_).
 
 pcenter_step(X) :-
     p_step(X),
@@ -164,7 +164,7 @@ check_player_pokemon :-
         )
      ).
 
-handle_encounter_choice(1, Rarity, _) :-
+handle_encounter_choice(1, Rarity, Pos) :-
     write('Persiapkan dirimu!'), nl,
     write('Pertarungan yang epik baru saja dimulai!'), nl,
     battle(Rarity), remove_pokemon_from_map(Pos).
