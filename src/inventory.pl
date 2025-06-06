@@ -48,6 +48,7 @@ catch_pokemon(Pokemon) :-
         asserta(poke_stats(HP, ATK, DEF, Pokemon, Idx, 1)),
         asserta(level(Leve1, Pokemon, Idx, 0, 1)), 
         add_to_party(Idx, Pokemon),
+        asserta(curr_health(Idx,Pokemon,HP)),
         format('~w tertangkap dan masuk ke party!~n', [Pokemon])
     ;
         (   item_inventory(Index, pokeball(empty)) ->
@@ -55,6 +56,7 @@ catch_pokemon(Pokemon) :-
             asserta(poke_stats(HP, ATK, DEF, Pokemon, Index, 0)),
             asserta(level(Leve1, Pokemon, Index, 0, 0)), 
             assertz(item_inventory(Index, pokeball(filled(Pokemon)))),
+            asserta(curr_health(Index,Pokemon,HP)),
             format('~w tertangkap dan disimpan di Poké Ball slot ~w~n', [Pokemon, Index])
         ;   
             format('Tidak ada Poke Ball kosong! Gagal menangkap ~w~n', [Pokemon]), fail

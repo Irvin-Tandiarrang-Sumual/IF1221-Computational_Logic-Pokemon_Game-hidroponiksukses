@@ -5,4 +5,4 @@ help:-
     write('moveDown     : Move player DOWN one tile'), nl, 
     write('moveRight    : Move player RIGHT one tile'), nl, 
     write('status       : See status of your party POKeMON'), nl, 
-    write('infoMapp     : Visualize map'), nl.
+    write('showMap      : Visualize map'), nl.

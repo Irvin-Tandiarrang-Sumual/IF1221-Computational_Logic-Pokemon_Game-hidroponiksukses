@@ -8,7 +8,7 @@
 :- dynamic(battleNow/1).
 :- dynamic(isOnPoke/1).
 :- dynamic(isBattle/1).
-:- dynamic(level/4).
+:- dynamic(level/5).
 :- dynamic(skill/5).
 :- dynamic(health/2).
 
