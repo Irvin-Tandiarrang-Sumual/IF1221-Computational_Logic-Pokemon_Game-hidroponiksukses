@@ -27,7 +27,7 @@ daftar_party :-
 
 has_alive_pokemon :-
     party(Index, Name),
-    curr_health(Index, Name, HP),
+    curr_health(Index, Name, HP, 1),
     HP > 0, !.
 
 tampilkan_party([]).
@@ -35,7 +35,7 @@ tampilkan_party([Index-Nama | T]) :-
     % Ambil data max HP
     poke_stats(HPMax, _, _, _, Index, 1),
     % Ambil data current HP
-    (curr_health(Index, Nama, CurrHP) -> true ; CurrHP = 0),
+    (curr_health(Index, Nama, CurrHP, 1) -> true ; CurrHP = 0),
     % Ambil data lainnya
     % Tampilkan data
     format('~w: ~w (~w/~w HP)~n', [Index, Nama, CurrHP, HPMax]),
@@ -71,7 +71,7 @@ init_poke(Index) :-
     curr_health(Index,Nama, CurrHPKita, 1),
     type(Type, Nama),
     retractall(statusKita(_, _, _, _, _, _, _, Index)),
-    assertz(statusKita(CurrHPKita, MaxHPKita, ATKKita, DEFKita, Nama, LevelKita, Type, Index)),
+    assertz(statusKita(CurrHPKita, MaxHPKita, ATKKita, DEFKita, Nama, ID, Type, Index)),
     retractall(player_level(_)),
     assertz(player_level(LevelKita)).
 
@@ -153,18 +153,18 @@ battle(Rarity) :-
 
 get_status(HP, MaxHP, ATK, DEF, Nama, ID) :-
     ( myTurn ->
-        statusKita(HP, MaxHP, ATK, DEF, Nama, _, _, ID)
+        statusKita(CurrHPKita, MaxHPKita, ATKKita, DEFKita, Nama, ID, Type, Index)
     ; 
-        statusLawan(HP, MaxHP, ATK, DEF, Nama, ID)
+        statusLawan(MaxHP, MaxHP, ATK, DEF, Nama, 99, Type)
     ).
 
 update_status(HP, MaxHP, ATK, DEF, Nama, ID) :-
     ( myTurn ->
-        retractall(statusKita(_, _, _, _, _, _, _, ID)),
-        assertz(statusKita(HP, MaxHP, ATK, DEF, Nama, 1, _, ID))
+        retractall(statusKita(_, _, _, _, _, Level, Type, Index)),
+        assertz(statusKita(HP, MaxHP, ATK, DEF, Nama, Level, Type, Index))
     ; 
-        retractall(statusLawan(_, _, _, _, _, ID)),
-        assertz(statusLawan(HP, MaxHP, ATK, DEF, Nama, ID))
+        retractall(statusLawan(_, _, _, _, _, ID, _)),
+        assertz(statusLawan(HP, MaxHP, ATK, DEF, Nama, ID, Type))
     ).
 
 ignore(Goal) :- call(Goal), !.
@@ -184,6 +184,7 @@ turn :-
             retractall(statusEfekKita(_)),
             ( has_alive_pokemon ->
                 write('Pilih Pokémon pengganti:\n'),
+                retract(statusKita(0, _, _, _, Name1, _, _, _)),
                 daftar_party,
                 pilih_pokemon,
                 turn
@@ -197,8 +198,8 @@ turn :-
         forall(
             (party(Index, Name), statusKita(HP, _, _, _, Name, _, _, Index)),
             (
-                retractall(curr_health(Index, Name, _)),
-                assertz(curr_health(Index, Name, HP)),
+                retractall(curr_health(Index, Name, _,1)),
+                assertz(curr_health(Index, Name, HP,1)),
                 addExp(X, Index, Name)
             )
         )
