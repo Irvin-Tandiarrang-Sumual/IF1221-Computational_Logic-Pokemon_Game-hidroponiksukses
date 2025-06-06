@@ -58,10 +58,10 @@ buat_lawan(Rarity) :-
     remaining_moves(Remaining),
 
     % Hitung batas level berdasarkan remaining_moves
-    LevelMin is min(14, max(2, round(2 + (20 - Remaining) / 2))),
-    LevelMax is min(14, max(LevelMin, round(4 + (20 - Remaining) / 1.5))),
+    LevelMin is min(15, max(2, round(2 + (20 - Remaining) / 2))),
+    LevelMax is min(15, max(LevelMin, round(4 + (20 - Remaining) / 1.5))),
     random_between(LevelMin, LevelMax, Level),
-    Level1 is Level -1,
+    Level1 is Level - 1,
     base_stats(HPBase, ATKBase, DEFBase, Nama),
     MaxHP is HPBase + 2 * Level1,
     ATK is ATKBase + 1 * Level1,
@@ -149,15 +149,35 @@ turn :-
     reset_defend,
     statusKita(HP1, _, _, _, Name1, _, _),
     statusLawan(HP2, _, _, _, Name2, _, _),
-    ( HP1 =< 0 ->
-        format('~w kamu kalah!~n', [Name1]),
-        write('Noob amat bang...'), nl,
-        assertz(situation(lose))
+    (
+        HP1 =< 0 ->
+            format('~w tumbang!~n', [Name1]),
+            % Coba ganti ke pokemon berikutnya jika masih ada
+            ( 
+                curr_health(NextIndex, 1, CurrHP), CurrHP > 0 ->
+                    party(NextIndex, NextPokemon),
+                    player(_, _, _, _, _, _, LevelKita),
+                    base_stats(HPBase, ATKBase, DEFBase, NextPokemon),
+                    MaxHP is HPBase + 2 * LevelKita,
+                    ATK is ATKBase + 1 * LevelKita,
+                    DEF is DEFBase + 1 * LevelKita,
+                    retractall(statusKita(_,_,_,_,_,_)),
+                    assertz(statusKita(MaxHP, MaxHP, ATK, DEF, NextPokemon, 1)),
+                    retractall(party(_, _)),
+                    assertz(party(NextIndex, NextPokemon)),
+                    format('~w masuk ke arena!~n', [NextPokemon]),
+                    turn  % Lanjut giliran setelah pergantian
+            ;
+                write('Semua Pokemonmu sudah kalah. Kamu kalah total...\n'),
+                retractall(situation(_)),
+                assertz(situation(lose))
+            )
     ; HP2 =< 0 ->
         format('Pokemon ~w kalah! Kamu menang!~n', [Name2]),
-        statusLawan(_, _, _, _, Nama, _, _), pokemon(_, Nama, Rarity), rarity(Rarity, _, Y, _),
+        statusLawan(_, _, _, _, Nama, _, _),
+        pokemon(_, Nama, Rarity), rarity(Rarity, _, Y, _),
         enemy_level(Z),
-        X is Y + Z*2,
+        X is Y + Z * 2,
         ignore((party(1, Nama1), addExp(X, 1, Nama1))),
         ignore((party(2, Nama2), addExp(X, 2, Nama2))),
         ignore((party(3, Nama3), addExp(X, 3, Nama3))),
@@ -239,7 +259,7 @@ skill(SkillNumber) :-
                 write('Skill 1 masih cooldown '), write(CD1), write(' turn.'), nl, fail
             ;
                 NamaSkill = Skill1,
-                NewCD1 = 1
+                NewCD1 = 2
             )
     ;
         SkillNumber =:= 2 ->
@@ -250,7 +270,7 @@ skill(SkillNumber) :-
                     write('Skill 2 masih cooldown '), write(CD2), write(' turn.'), nl, fail
                 ;
                     NamaSkill = Skill2,
-                    NewCD2 = 2
+                    NewCD2 = 4
                 )
             )
     ;
@@ -456,3 +476,22 @@ enemy_use_skill(NamaSkill) :-
     toggle_turn,
     turn.
 
+ganti_pokemon_otomatis :-
+    party(Index, _),              % Ambil index saat ini
+    NextIndex is Index + 1,
+    ( party(NextIndex, NextPokemon) ->
+        player(_, _, _, _, _, _, LevelKita),
+        base_stats(HPBase, ATKBase, DEFBase, NextPokemon),
+        MaxHP is HPBase + 2 * LevelKita,
+        ATK is ATKBase + 1 * LevelKita,
+        DEF is DEFBase + 1 * LevelKita,
+        retractall(statusKita(_,_,_,_,_,_)),
+        assertz(statusKita(MaxHP, MaxHP, ATK, DEF, NextPokemon, 1)),
+        retractall(party(_, _)),  % Reset index
+        assertz(party(NextIndex, NextPokemon)),
+        format("~n~w masuk ke arena!~n", [NextPokemon]),
+        turn
+    ;   write('Semua Pokemonmu sudah kalah. Kamu kalah total...\n'),
+        retractall(situation(_)),
+        assertz(situation(kalah))
+    ).
