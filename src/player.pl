@@ -1,9 +1,5 @@
 
 /* Variable dynamic */
-/* TODO */
-:- dynamic(listPoke/1).
-/* TODO */
-:- dynamic(idAv/1).
 /* party: (Inventory index (start from 1), Pokemon_name) */
 :- dynamic(party/2).
 /* curr_health : (Indeks, Nama, CurrHP, Bool_party)*/

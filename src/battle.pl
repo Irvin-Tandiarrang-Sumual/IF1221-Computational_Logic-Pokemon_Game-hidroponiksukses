@@ -53,7 +53,7 @@ pilih_pokemon :-
         curr_health(Index, Name, HP, 1),
         HP > 0 ->
             format('Kamu memilih ~w sebagai Pokemon utama!~n', [Name]),
-            init_poke(Index), retractall(atkindex(_)), asserta(atkindex(Index)),!
+            retractall(atkindex(_)), asserta(atkindex(Index)), init_poke(Index),!
         ;
         write('Pilihan tidak valid atau Pokémon sudah tumbang, silakan pilih lagi.'), nl,
         fail
@@ -65,6 +65,7 @@ valid_pokemon_choice(Index) :-
     HP > 0.
 
 init_poke(Index) :-
+    atkindex(Index),
     party(Index, Nama),
     level(LevelKita,Nama,Index, _, 1),
     poke_stats(MaxHPKita, ATKKita, DEFKita, Nama, Index, 1),
@@ -201,16 +202,15 @@ turn :-
     ; HP2 =< 0 ->
         format('Pokemon ~w kalah! Kamu menang!~n', [Name2]),
         forall(
-            (party(Index, Name), curr_health(Index, Name, HP, 1)),
+            (party(Index1, Name), curr_health(Index1, Name, HP, 1)),
             (
                 enemy_level(X), rarity(Rarity, _, Y, _), Expgiven is Y + X*2,
-                retractall(curr_health(Index, Name, _,1)),
-                assertz(curr_health(Index, Name, HP, 1)),
-                addExp(Expgiven, Index, Name),
-                retractall(situation(_)),
-                assertz(situation(win))
+                retractall(curr_health(Index1, Name, _,1)),
+                assertz(curr_health(Index1, Name, HP, 1)),
+                ignore(addExp(Expgiven, Index1, Name))
             )
-        )
+        ),
+        retractall(situation(_)), assertz(situation(win))
     ; myTurn ->
         nl, handle_player_turn, nl
     ; handle_enemy_turn
