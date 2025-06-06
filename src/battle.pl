@@ -21,35 +21,59 @@ random_between(Low, High, R) :-
 
 daftar_party :-
     findall(Index-Nama, party(Index, Nama), List),
-    sort(List, Sorted), % sort biar urut indeks
+    sort(List, Sorted),
     write('Daftar Pokémon dalam party kamu:'), nl,
     tampilkan_party(Sorted).
 
+has_alive_pokemon :-
+    party(Index, Name),
+    curr_health(Index, Name, HP),
+    HP > 0, !.
+
 tampilkan_party([]).
 tampilkan_party([Index-Nama | T]) :-
-    format('~w: ~w~n', [Index, Nama]),
+    % Ambil data max HP
+    poke_stats(HPMax, _, _, _, Index, 1),
+    % Ambil data current HP
+    (curr_health(Index, Nama, CurrHP) -> true ; CurrHP = 0),
+    % Ambil data lainnya
+    % Tampilkan data
+    format('~w: ~w (~w/~w HP)~n', [Index, Nama, CurrHP, HPMax]),
     tampilkan_party(T).
 
+
 pilih_pokemon :-
+    repeat,
     write('Masukkan indeks Pokémon yang ingin kamu gunakan: '), nl,
     write('>> '),
     read(Index),
-    init_poke(Index).
-
-init_poke(Index):-
-    (   party(Index, Nama) ->
-        level(LevelKita,Nama,Index, _, 1),
-        poke_stats(MaxHPKita, ATKKita, DEFKita, Nama, Index, 1),
-        curr_health(Index,Nama, CurrHPKita),
-        type(Type, Nama),
-        retractall(statusKita(_, _, _, _, _, _, _, Index)),
-        assertz(statusKita(CurrHPKita, MaxHPKita, ATKKita, DEFKita, Nama, LevelKita, Type, Index)),
-        retractall(player_level(_)),
-        assertz(player_level(LevelKita)),
-        format('Kamu memilih ~w sebagai Pokemon utama!~n', [Nama])
-    ;   write('Indeks tidak ditemukan dalam party.'), nl,
-        pilih_pokemon  % Ulangi jika salah input
+    (
+        party(Index, Name),
+        curr_health(Index, Name, HP),
+        HP > 0 ->
+            format('Kamu memilih ~w sebagai Pokemon utama!~n', [Name]),
+            init_poke(Index),
+            !
+        ;
+        write('Pilihan tidak valid atau Pokémon sudah tumbang, silakan pilih lagi.~n'),
+        fail
     ).
+
+valid_pokemon_choice(Index) :-
+    party(Index, Name),
+    curr_health(Index, Name, HP),
+    HP > 0.
+
+init_poke(Index) :-
+    party(Index, Pokemon),
+    curr_health(Index, Pokemon, CurrHP),
+    player(_, _, _, _, _, _, Level),
+    base_stats(HPBase, ATKBase, DEFBase, Pokemon),
+    MaxHP is HPBase + 2 * Level,
+    ATK is ATKBase + 1 * Level,
+    DEF is DEFBase + 1 * Level,
+    retractall(statusKita(_,_,_,_,_,_,_,_)),
+    assertz(statusKita(CurrHP, MaxHP, ATK, DEF, Pokemon, 1, _, Index)).
 
 buat_lawan(Rarity) :-
     pokeRandomizer(Rarity, Nama),
@@ -152,21 +176,14 @@ turn :-
     (
         HP1 =< 0 ->
             format('~w tumbang!~n', [Name1]),
-            % Coba ganti ke pokemon berikutnya jika masih ada
-            ( 
-                curr_health(NextIndex, 1, CurrHP), CurrHP > 0 ->
-                    party(NextIndex, NextPokemon),
-                    player(_, _, _, _, _, _, LevelKita),
-                    base_stats(HPBase, ATKBase, DEFBase, NextPokemon),
-                    MaxHP is HPBase + 2 * LevelKita,
-                    ATK is ATKBase + 1 * LevelKita,
-                    DEF is DEFBase + 1 * LevelKita,
-                    retractall(statusKita(_,_,_,_,_,_)),
-                    assertz(statusKita(MaxHP, MaxHP, ATK, DEF, NextPokemon, 1)),
-                    retractall(party(_, _)),
-                    assertz(party(NextIndex, NextPokemon)),
-                    format('~w masuk ke arena!~n', [NextPokemon]),
-                    turn  % Lanjut giliran setelah pergantian
+            retractall(curr_health(1, Name1, _)),
+            assertz(curr_health(1, Name1, 0)),
+            retractall(statusEfekKita(_)),
+            ( has_alive_pokemon ->
+                write('Pilih Pokémon pengganti:\n'),
+                daftar_party,
+                pilih_pokemon,
+                turn
             ;
                 write('Semua Pokemonmu sudah kalah. Kamu kalah total...\n'),
                 retractall(situation(_)),
@@ -174,14 +191,13 @@ turn :-
             )
     ; HP2 =< 0 ->
         format('Pokemon ~w kalah! Kamu menang!~n', [Name2]),
-        statusLawan(_, _, _, _, Nama, _, _),
-        pokemon(_, Nama, Rarity), rarity(Rarity, _, Y, _),
-        enemy_level(Z),
-        X is Y + Z*2,
-        ignore((party(1, Nama1), statusKita(NewHP1, _, _, _, Nama1, _, _, 1), retract(curr_health(1,Nama1,_)), assertz(curr_health(1,Nama1, NewHP1)), addExp(X, 1, Nama1))),
-        ignore((party(2, Nama2), statusKita(NewHP2, _, _, _, Nama2, _, _, 2), retract(curr_health(2,Nama2,_)), assertz(curr_health(2,Nama2, NewHP2)), addExp(X, 2, Nama2))),
-        ignore((party(3, Nama3), statusKita(NewHP3, _, _, _, Nama3, _, _, 3), retract(curr_health(3,Nama3,_)), assertz(curr_health(3,Nama3, NewHP3)), addExp(X, 3, Nama3))),
-        ignore((party(4, Nama4), statusKita(NewHP4, _, _, _, Nama4, _, _, 4), retract(curr_health(4,Nama4,_)), assertz(curr_health(4,Nama4, NewHP4)), addExp(X, 4, Nama4)))
+        forall(
+            (party(Index, Name), statusKita(HP, _, _, _, Name, _, _, Index)),
+            (
+                retractall(curr_health(Index, Name, _)),
+                assertz(curr_health(Index, Name, HP))
+            )
+        )
     ; myTurn ->
         nl, handle_player_turn, nl
     ; handle_enemy_turn
@@ -190,6 +206,12 @@ turn :-
 turn :-
     situation(Status),
     format('Pertarungan selesai! Hasil: ~w~n', [Status]).
+
+find_next_alive_pokemon(CurrentIndex, NextIndex, PokemonName) :-
+    party(NextIndex, PokemonName),
+    NextIndex \= CurrentIndex,
+    curr_health(NextIndex, PokemonName, HP),
+    HP > 0, !.  % ! agar ambil yang pertama ketemu
 
 handle_player_turn :-
     statusEfekKita(sleep(T)), T > 0, !,
