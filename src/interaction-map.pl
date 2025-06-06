@@ -33,9 +33,11 @@ move(DX, DY) :-
     /* Check whether the player's stil have moves left */
     remaining_moves(MovesLeft),
     MovesLeft > 0,
+    update_map,
 
     map(Matrix),
     findall((X,Y), (nth0(X, Matrix, Row), nth0(Y, Row, 'P')), [(OldX, OldY)]),
+
     NewX is OldX + DX,
     NewY is OldY + DY,
     check_valid_move(Matrix, NewX, NewY),
@@ -58,6 +60,10 @@ move(DX, DY) :-
     NewMovesLeft is MovesLeft - 1,
     retract(remaining_moves(_)), assertz(remaining_moves(NewMovesLeft)),
     format("Moves left: ~d~n", [NewMovesLeft]),nl.
+
+update-map:-
+    ( pokemap(PokeList), member((Type, (OldX, OldY)), PokeList) -> true ; (last_player_tile(TileToRestore), TileToRestore = 'C' -> replace_positions(Matrix, (OldX,OldY), NewMatrix, ' '), retractall(map(Matrix)), assertz(map(NewMatrix)))).
+update_map:- true.  
 
 move(_, _) :-
     remaining_moves(0),
@@ -186,6 +192,11 @@ player_on_any_pokemon(Rarity, (PX, PY)) :-
 
 remove_pokemon_from_map(Pos) :-
     pokemap(PokeList),
-    delete(PokeList, (_, Pos), NewList),
+    remove_pokes(PokeList, Pos, NewList),
     retractall(pokemap(_)),
     assertz(pokemap(NewList)).
+
+remove_pokes([], _, []).
+remove_pokes([(Name, Pos)|T], Pos, T) :- !.  
+remove_pokes([H|T], Pos, [H|Rest]) :-
+    remove_pokes(T, Pos, Rest).
