@@ -13,9 +13,15 @@
 chooseStarter:-  findall(NamaX,starter(X, NamaX),ListStarter),
     retractall(curr_health(_, _, _, _)),
     writeList(ListStarter),
+    repeat,
     write('Choose your POKeMON'),nl,
     /* Choosing 2 starter */
     write('>> '), read(Starter1), write('>> '), read(Starter2),
+    ( Starter1 >= 1, Starter1 =< 3, Starter2 >= 1, Starter2 =< 3 -> !
+    ;
+        write('Indeks Pokemon yang Kamu Pilih Ada yang Tidak Valid'), nl,
+        fail
+    ),
     starterToInventory(Starter1, Starter2),!.
 
 /* Putting starter to inventory */

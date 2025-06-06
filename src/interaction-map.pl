@@ -129,8 +129,18 @@ check_player_pokemon :-
         (
             member((Rarity, (PX, PY)), PokeList) ->
                 format("Kamu menemukan Pokemon rarity ~w! pilih opsi: ~n", [Rarity]),
-                write('1.   Bertarung'), nl, write('2.   Tangkap'), nl, write('3.   Kabur(NOOB)'), nl, showMap, 
-                write('>> '), read(Pilihan), handle_encounter_choice(Pilihan, Rarity, (PX, PY))
+                write('1.   Bertarung'), nl, 
+                write('2.   Tangkap'), nl, 
+                write('3.   Kabur(NOOB)'), nl, 
+                showMap, 
+                repeat,
+                write('>> '), read(Pilihan),
+                (Pilihan >= 1, Pilihan =< 3 -> 
+                    handle_encounter_choice(Pilihan, Rarity, (PX, PY)), ! 
+                ;
+                    write('Pilihanmu tidak valid!'), nl,
+                    fail
+                )
             ;
                 write('Sepertinya tidak ada tanda-tanda kehidupan disini...'), nl, showMap
         )
@@ -138,8 +148,17 @@ check_player_pokemon :-
         (
             member((Rarity, (PX, PY)), PokeList) ->
                 format("Kamu menemukan Pokemon rarity ~w! pilih opsi: ~n", [Rarity]),
-                write('1.   Bertarung'), nl, write('2.   Tangkap'), nl, write('3.   Kabur(NOOB)'), nl, showMap,
-                write('>> '), read(Pilihan), handle_encounter_choice(Pilihan, Rarity, (PX, PY))
+                write('1.   Bertarung'), nl, 
+                write('2.   Tangkap'), nl, 
+                write('3.   Kabur(NOOB)'), nl, showMap,
+                repeat,
+                write('>> '), read(Pilihan), 
+                (Pilihan >= 1, Pilihan =< 3 ->
+                    handle_encounter_choice(Pilihan, Rarity, (PX, PY)), ! 
+                ;
+                    write('Pilihanmu tidak valid!'), nl,
+                    fail
+                )
             ;
                 showMap, true
         )
