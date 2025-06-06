@@ -174,8 +174,8 @@ ignore(_).
 turn :-
     situation(ongoing), !,
     atkindex(Index),
-    apply_turn_effects,
-    reset_defend,
+    ignore(apply_turn_effects),
+    ignore(reset_defend),
     statusKita(HP1, _, _, _, Name1, _, _, Index),
     statusLawan(HP2, _, _, _, Name2, _, _),
     (
@@ -233,7 +233,7 @@ handle_player_turn :-
     retract(statusEfekKita(_, sleep(T))),
     (NewT > 0 -> assertz(statusEfekKita(_, sleep(NewT))) ; true),
     statusKita(_, _, _, _, Name, _, _, _),
-    write(Name), write(' sedang tidur... turn dilewati.'), nl.
+    write(Name), write(' sedang tidur... turn dilewati.'), nl, nl, toggle_turn, turn.
 
 handle_player_turn :-
     write('Giliran kamu! Pilih aksi: attack. | defend. | skill(N).').
@@ -244,7 +244,7 @@ handle_enemy_turn :-
     retract(statusEfekLawan(sleep(T))),
     (NewT > 0 -> assertz(statusEfekLawan(sleep(NewT))) ; true),
     statusLawan(_, _, _, _, Name, _, _),
-    write(Name), write(' sedang tidur... turn dilewati.'), nl.
+    write(Name), write(' sedang tidur... turn dilewati.'), nl, nl, toggle_turn, turn.
 
 handle_enemy_turn :-
     statusLawan(CurHP, _, _, _, Name, _, _),
@@ -408,11 +408,11 @@ apply_ability(heal(Ratio), _) :-
     write(Nama), write(' memulihkan '), write(Heal), write(' HP!'), nl.
 apply_ability(sleep(Turns), _) :-
     ( myTurn ->
-        assertz(statusEfekLawan(sleep(Turns))),
-        statusLawan(_,_,_,_,Nama,_,_)
-    ;
-        assertz(statusEfekKita(sleep(Turns))),
-        statusKita(_,_,_,_,Nama,_, _, _)
+        statusKita(_, _, _, _,Nama,_, _, Index),
+        assertz(statusEfekKita(Index, sleep(Turns)))
+    ;   
+        statusLawan(_, _, _, _, Nama, _, _),
+        assertz(statusEfekLawan(sleep(Turns)))
     ),
     write('Efek sleep diterapkan ke '), write(Nama),
     write('! Akan tertidur selama '), write(Turns), write(' turn.'), nl.
@@ -435,12 +435,14 @@ apply_turn_effects :-
 
 reduce_cooldown :-
     ( myTurn ->
+        \+ statusEfekKita(_, sleep(_)),
         cooldown_kita(CD1, CD2),
         NewCD1 is max(0, CD1 - 1),
         NewCD2 is max(0, CD2 - 1),
         retract(cooldown_kita(_, _)),
         assertz(cooldown_kita(NewCD1, NewCD2))
     ;
+        \+ statusEfekLawan(sleep(_)),
         cooldown_lawan(CD1, CD2),
         NewCD1 is max(0, CD1 - 1),
         NewCD2 is max(0, CD2 - 1),
