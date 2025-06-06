@@ -200,7 +200,9 @@ turn :-
                 assertz(situation(lose))
             )
     ; HP2 =< 0 ->
-        format('Pokemon ~w kalah! Kamu menang!~n', [Name2]),
+        format('Pokemon ~w kalah! Kamu menang!~n~n', [Name2]),
+        enemy_level(Level1),
+        kalahkan_pokemon,
         forall(
             (party(Index1, Name), curr_health(Index1, Name, HP, 1)),
             (
@@ -541,4 +543,28 @@ ganti_pokemon_otomatis :-
     ;   write('Semua Pokemonmu sudah kalah. Kamu kalah total...\n'),
         retractall(situation(_)),
         assertz(situation(kalah))
+    ).
+
+kalahkan_pokemon :-
+    party_slots_remaining(Remaining),
+    statusLawan(_, HP, ATK, DEF, Pokemon, _, _),
+    enemy_level(Level),
+    (Remaining > 0 ->
+        Idx is 5 - Remaining, 
+        assertz(poke_stats(HP, ATK, DEF, Pokemon, Idx, 1)),
+        assertz(level(Level, Pokemon, Idx, 0, 1)), 
+        add_to_party(Idx, Pokemon),
+        assertz(curr_health(Idx,Pokemon,HP, 1)),
+        format('~w tertangkap dan masuk ke party!~n', [Pokemon])
+    ;
+        (   item_inventory(Index, pokeball(empty)) ->
+            retract(item_inventory(Index, pokeball(empty))),
+            assertz(poke_stats(HP, ATK, DEF, Pokemon, Index, 0)),
+            assertz(level(Level1, Pokemon, Index, 0, 0)), 
+            assertz(item_inventory(Index, pokeball(filled(Pokemon)))),
+            assertz(curr_health(Index,Pokemon,HP, 0)),
+            format('~w tertangkap dan disimpan di Poké Ball slot ~w~n', [Pokemon, Index])
+        ;   
+            format('Tidak ada Poke Ball kosong! Gagal menangkap ~w~n', [Pokemon]), fail
+        )
     ).
