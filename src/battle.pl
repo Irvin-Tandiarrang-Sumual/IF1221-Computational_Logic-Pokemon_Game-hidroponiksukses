@@ -265,7 +265,7 @@ skill(SkillNumber) :-
     ( SkillNumber =:= 1 ->
         retract(cooldown_kita(_, CD2)),
         assertz(cooldown_kita(NewCD1, CD2))
-    ;
+    ; SkillNumber =:= 2 ->
         retract(cooldown_kita(CD1, _)),
         assertz(cooldown_kita(CD1, NewCD2))
     ), toggle_turn,
