@@ -160,8 +160,8 @@ get_status(HP, MaxHP, ATK, DEF, Nama, ID) :-
 
 update_status(HP, MaxHP, ATK, DEF, Nama, ID) :-
     ( myTurn ->
-        retractall(statusKita(_, _, _, _, _, Level, Type, Index)),
-        assertz(statusKita(HP, MaxHP, ATK, DEF, Nama, Level, Type, Index))
+        retractall(statusKita(_, _, _, _, _, ID, Type, Index)),
+        assertz(statusKita(HP, MaxHP, ATK, DEF, Nama, ID, Type, Index))
     ; 
         retractall(statusLawan(_, _, _, _, _, ID, _)),
         assertz(statusLawan(HP, MaxHP, ATK, DEF, Nama, ID, Type))
