@@ -277,7 +277,8 @@ attack :-
 
 skill(SkillNumber) :-
     myTurn,
-    statusKita(_, _, _, _, NamaPokemon, Level, _, _),
+    statusKita(_, _, _, _, NamaPokemon, _, _, Index),
+    level(Level, NamaPokemon, Index, _, 1),
     cooldown_kita(CD1, CD2),
     pokeSkill(NamaPokemon, Skill1, Skill2),
     (
