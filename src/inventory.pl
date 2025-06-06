@@ -65,13 +65,14 @@ catch_pokemon(Pokemon) :-
 
 /* Menampilkan inventori */
 show_bag :-
-    nl, write('=== Isi Inventori (40 slot) ==='), nl,
+    nl, write('=== Isi Inventory (40 slot) ==='), nl,
     show_inventory(0).
 
 show_inventory(40) :- !.
 show_inventory(Index) :-
     (   item_inventory(Index, Item) -> true ; Item = kosong ),
-    format('Slot ~w: ', [Index]),
+    Index1 is Index + 1,
+    format('Slot ~w: ', [Index1]),
     (Item == empty -> write('Kosong') ; write(Item)),
     nl,
     Next is Index + 1,
