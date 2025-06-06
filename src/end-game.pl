@@ -19,19 +19,29 @@ print_end_game_opening :-
 buat_lawan_mewtwo :-
     Nama = mewtwo,
     Level = 20,
+    Level1 is Level -1,
     base_stats(HPBase, ATKBase, DEFBase, Nama),
-    MaxHP is HPBase + 2 * Level,
-    ATK is ATKBase + 1 * Level,
-    DEF is DEFBase + 1 * Level,
-    retractall(statusLawan(_,_,_,_,_,_)),
-    assertz(statusLawan(MaxHP, MaxHP, ATK, DEF, Nama, 99)),
-    write('Kamu melawan '), write(Nama), nl,
+    MaxHP is HPBase + 2 * Level1,
+    ATK is ATKBase + 1 * Level1,
+    DEF is DEFBase + 1 * Level1,
+    type(Type, Nama),
+    retractall(statusLawan(_, _, _, _, _, _, _)),
+    assertz(statusLawan(MaxHP, MaxHP, ATK, DEF, Nama, 99, Type)),
+    retractall(enemy_level(_)),
+    assertz(enemy_level(Level)),
+    pokemon(ID, Nama, _),
+    pokemon_ascii(ID),
+    write('Kamu melawan '), write(Nama), write('.'), nl,
     write('Level: '), write(Level), nl,
     write('HP: '), write(MaxHP), nl,
     write('ATK: '), write(ATK), nl,
-    write('DEF: '), write(DEF), nl,
+    write('DEF: '), write(DEF), nl, nl,
+    write('Pilih Pokemon mu dari party!'), nl,
+    daftar_party,
+    pilih_pokemon,
     retractall(defendStatus(_, _)),
-    assertz(defendStatus(1,1)).
+    assertz(defendStatus(1, 1)),
+    true.
 
 /* Final battle */
 start_final_battle :-
