@@ -6,9 +6,9 @@ quiz_pokemon(NamaPokemon) :-
     ( X == Answer ->
         write('Jawaban benar!'), nl,
         statusKita(CurHP, MaxHP, ATK, DEF, Nama, Level, Type, Slot),
-        retract(level(Level, Nama, Slot, Exp)),
+        retract(level(Level, Nama, Slot, Exp, 1)),
         Exp1 is Exp + 25,
-        assertz(level(Level, Nama, Slot, Exp1)),
+        assertz(level(Level, Nama, Slot, Exp1, 1)),
         write('Exp '), write(Nama), write(' bertambah 25 exp! ('), write(Exp), write(' -> '), write(Exp1), write(')'), nl
     ;
         write('Jawaban salah. Tipe yang benar adalah: '), write(X), nl
