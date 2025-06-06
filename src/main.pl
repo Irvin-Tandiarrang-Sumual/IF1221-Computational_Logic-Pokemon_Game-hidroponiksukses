@@ -42,7 +42,7 @@ exit :-
         retractall(listPoke(_)),
         retractall(idAv(_)),
         retractall(no_inventory(_, _)),
-        retractall(curr_health(_, _)),
+        retractall(curr_health(_, _, _, _)),
         retractall(isSkillUsed_Self(_, _)),
         retractall(isHeal(_)),
         retractall(inventory(_)),

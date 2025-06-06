@@ -45,18 +45,18 @@ catch_pokemon(Pokemon) :-
     Leve1 is Level + 1,
     (Remaining > 0 ->
         Idx is 5 - Remaining, 
-        asserta(poke_stats(HP, ATK, DEF, Pokemon, Idx, 1)),
-        asserta(level(Leve1, Pokemon, Idx, 0, 1)), 
+        assertz(poke_stats(HP, ATK, DEF, Pokemon, Idx, 1)),
+        assertz(level(Leve1, Pokemon, Idx, 0, 1)), 
         add_to_party(Idx, Pokemon),
-        asserta(curr_health(Idx,Pokemon,HP)),
+        assertz(curr_health(Idx,Pokemon,HP, 1)),
         format('~w tertangkap dan masuk ke party!~n', [Pokemon])
     ;
         (   item_inventory(Index, pokeball(empty)) ->
             retract(item_inventory(Index, pokeball(empty))),
-            asserta(poke_stats(HP, ATK, DEF, Pokemon, Index, 0)),
-            asserta(level(Leve1, Pokemon, Index, 0, 0)), 
+            assertz(poke_stats(HP, ATK, DEF, Pokemon, Index, 0)),
+            assertz(level(Leve1, Pokemon, Index, 0, 0)), 
             assertz(item_inventory(Index, pokeball(filled(Pokemon)))),
-            asserta(curr_health(Index,Pokemon,HP)),
+            assertz(curr_health(Index,Pokemon,HP, 0)),
             format('~w tertangkap dan disimpan di Poké Ball slot ~w~n', [Pokemon, Index])
         ;   
             format('Tidak ada Poke Ball kosong! Gagal menangkap ~w~n', [Pokemon]), fail
@@ -111,9 +111,40 @@ add_to_party(Index, Pokemon) :-
         write('Party penuh!'), nl, fail
     ).
 
-
 party_slots_remaining(Remaining) :-
     findall(P, party(_, P), List),
     length(List, Len),
     max_party_size(Max),
     Remaining is Max - Len.
+
+invenswitch(Inven, Party):-
+    Party1 is Party + 1,
+    poke_stats(HPi, ATKi, DEFi, Pokemoni, Inven, 0),
+    poke_stats(HPp, ATKp, DEFp, Pokemonp, Party1, 1),
+    curr_health(Inven, Pokemoni, CurrHpi, 0),
+    curr_health(Party1, Pokemonp, CurrHpp, 1),
+    level(Leveli, Pokemoni, Inven, Counteri, 0),
+    level(Levelp, Pokemonp, Party1, Counterp, 1),
+    party(Party1,Pokemonp),
+
+    /* Ambil pokemon inven */
+    retract(poke_stats(HPi, ATKi, DEFi, Pokemoni, Inven, 0)),
+    retract(curr_health(Inven, Pokemoni, CurrHpi, 0)),
+    retract(level(Leveli, Pokemoni, Inven, Counteri, 0)),
+
+    /* replace pokemon party ke inven */
+    assertz(poke_stats(HPp, ATKp, DEFp, Pokemonp, Inven, 0)),
+    assertz(curr_health(Inven, Pokemonp, CurrHpp, 0)),
+    assertz(level(Levelp, Pokemonp, Inven, Counterp, 0)),   
+
+    /* Ambil pokemon party */
+    retract(poke_stats(HPp, ATKp, DEFp, Pokemonp, Party1, 1)),
+    retract(curr_health(Party1, Pokemomonp, CurrHpp, 1)),
+    retract(level(Levelp, Pokemonp, Party1, Counterp, 1)),
+    retract(party(Party1,Pokemonp)),
+
+    /* replace pokemon inven ke party */
+    assertz(poke_stats(HPi, ATKi, DEFpi, Pokemoni, Party1, 1)),
+    assertz(curr_health(Party1, Pokemoni, CurrHpi, 1)),
+    assertz(level(Leveli, Pokemoni, Party1, Counteri, 1)),
+    assertz(party(Party,Pokemoni)).

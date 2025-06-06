@@ -39,9 +39,9 @@ type(fire, charmeleon).
 type(water, wartortle).
 type(psychic, mewtwo).
 
-starter(charmander).
-starter(squirtle).
-starter(pidgey).
+starter(1, charmander).
+starter(2, squirtle).
+starter(3, pidgey).
 
 
 legendary(articuno).
@@ -62,7 +62,7 @@ base_stats(250, 300, 250, mewtwo).
 
 /* level Pokemon */
 /* level(Level, Nama_pokemon, Slot_Inventory, EXP_Counter) */
-init_starter:- asserta(level(1,pidgey,0, 0, 0)), asserta(level(1,charmander,0, 0, 0)), asserta(level(1,squirtle,0, 0, 0)).
+init_starter:- asserta(level(1,pidgey,0, 0, -1)), asserta(level(1,charmander,0, 0, -1)), asserta(level(1,squirtle,0, 0, -1)).
 
 /* Poke stats */
 /* poke_stats(HP, ATK, DEF, Nama_pokemon, Slot_Inventory, Boolean_party) */

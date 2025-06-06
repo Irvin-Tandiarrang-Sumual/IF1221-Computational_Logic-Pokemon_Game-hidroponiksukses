@@ -6,16 +6,16 @@
 :- dynamic(idAv/1).
 /* party: (Inventory index (start from 1), Pokemon_name) */
 :- dynamic(party/2).
-/* curr_health : (Indeks, Nama, CurrHP)*/
-:- dynamic(curr_health/3).
+/* curr_health : (Indeks, Nama, CurrHP, Bool_party)*/
+:- dynamic(curr_health/4).
 /* TODO */
 :- dynamic(isSkillUsed_Self/2).
 /* TODO */
 :- dynamic(isHeal/1).
 
 /* Initiating to choose starter */
-chooseStarter:-  findall(X,starter(X),ListStarter),
-    retractall(curr_health(_, _, _)),
+chooseStarter:-  findall(NamaX,starter(X, NamaX),ListStarter),
+    retractall(curr_health(_, _, _, _)),
     writeList(ListStarter),
     write('Choose your POKeMON'),nl,
     /* Choosing 2 starter */
@@ -25,24 +25,23 @@ chooseStarter:-  findall(X,starter(X),ListStarter),
 /* Putting starter to inventory */
 starterToInventory(X, Y) :- 
     /* Adding choosen starter as new level dynamic variable */
-    starter(X), starter(Y), level(Lev,X, 0, 0, 0), asserta(level(Lev,X, 1, 0, 1)), level(Lev,Y, 0, 0, 0), asserta(level(Lev,Y, 2, 0, 1)),
-    /* Adding choosen starter's name to inventory */
-    asserta(inventory(X)), asserta(inventory(Y)),
+    starter(X, NamaX), starter(Y, NamaY), level(Lev, NamaX, 0, 0, -1), asserta(level(Lev, NamaX, 1, 0, 1)),
+    level(Lev, NamaY, 0, 0, -1), asserta(level(Lev, NamaY, 2, 0, 1)),
     /* Setting stats for choosen starter 1 (X) */
-    base_stats(HP1, ATK1, DEF1, X),
-    asserta(poke_stats(HP1, ATK1, DEF1, X, 1, 1)),
-    assertz(curr_health(1,X,HP1)),
+    base_stats(HP1, ATK1, DEF1, NamaX),
+    asserta(poke_stats(HP1, ATK1, DEF1, NamaX, 1, 1)),
+    assertz(curr_health(1, NamaX, HP1, 1)),
     asserta(isSkillUsed_Self(1,0)),
-    add_to_party(1, X),
+    add_to_party(1, NamaX),
     asserta(jml_inventory(1)),
     /* Setting stats for choosen starter 2 (Y) */
-    base_stats(HP2, ATK2, DEF2, Y),
-    asserta(poke_stats(HP2, ATK2, DEF2, Y, 2, 1)),
-    assertz(curr_health(2,Y,HP2)),
+    base_stats(HP2, ATK2, DEF2, NamaY),
+    asserta(poke_stats(HP2, ATK2, DEF2, NamaY, 2, 1)),
+    assertz(curr_health(2, NamaY, HP2, 1)),
     asserta(isSkillUsed_Self(2,0)),
-    add_to_party(2, Y),
+    add_to_party(2, NamaY),
     asserta(jml_inventory(2)),
-    write(X), write(' & '), write(Y), write(' is now your partner!'),nl, !.
+    write(NamaX), write(' & '), write(NamaY), write(' is now your partner!'),nl, !.
 
 /* Print all starter to console */
 /* Basis */
@@ -72,7 +71,7 @@ showStatusList([[No_invenH, XH]|T]) :-
     No_invenH > 0,
     party(No_invenH, XH),      % Jika predicate party dipakai seperti ini
     poke_stats(HP, _, _, _, No_invenH, 1),
-    curr_health(No_invenH, XH, CurrHP),
+    curr_health(No_invenH, XH, CurrHP, 1),
     pokemon(_, XH, Rarity),
     rarity(Rarity, BaseEXP, _, _),
     type(Type, XH),
@@ -91,7 +90,8 @@ levelUp(X, No_inven) :-
     party(No_inven, X),
     pokemon(ID, X, Rarity), level(Lev,X, No_inven, Exp, _),
     rarity(Rarity, BaseEXP, _, _), !,
-    Exp >= (BaseEXP*Lev), statsUp(Lev, X, No_inven, BaseEXP).
+    Exp >= (BaseEXP*Lev), statsUp(Lev, X, No_inven, BaseEXP),
+    addExp(0, No_inven, X).
 
 /* Changing the level and stats, reduce CurrentEXP by EXPCap */
 statsUp(Lev, X, No_inven, BaseEXP):-

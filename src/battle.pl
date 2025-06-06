@@ -40,7 +40,7 @@ init_poke(Index):-
     (   party(Index, Nama) ->
         level(LevelKita,Nama,Index, _, 1),
         poke_stats(MaxHPKita, ATKKita, DEFKita, Nama, Index, 1),
-        curr_health(Index,Nama, CurrHPKita),
+        curr_health(Index,Nama, CurrHPKita, 1),
         type(Type, Nama),
         retractall(statusKita(_, _, _, _, _, _, _, Index)),
         assertz(statusKita(CurrHPKita, MaxHPKita, ATKKita, DEFKita, Nama, LevelKita, Type, Index)),
@@ -158,10 +158,10 @@ turn :-
         statusLawan(_, _, _, _, Nama, _, _), pokemon(_, Nama, Rarity), rarity(Rarity, _, Y, _),
         enemy_level(Z),
         X is Y + Z*2,
-        ignore((party(1, Nama1), statusKita(NewHP1, _, _, _, Nama1, _, _, 1), retract(curr_health(1,Nama1,_)), assertz(curr_health(1,Nama1, NewHP1)), addExp(X, 1, Nama1))),
-        ignore((party(2, Nama2), statusKita(NewHP2, _, _, _, Nama2, _, _, 2), retract(curr_health(2,Nama2,_)), assertz(curr_health(2,Nama2, NewHP2)), addExp(X, 2, Nama2))),
-        ignore((party(3, Nama3), statusKita(NewHP3, _, _, _, Nama3, _, _, 3), retract(curr_health(3,Nama3,_)), assertz(curr_health(3,Nama3, NewHP3)), addExp(X, 3, Nama3))),
-        ignore((party(4, Nama4), statusKita(NewHP4, _, _, _, Nama4, _, _, 4), retract(curr_health(4,Nama4,_)), assertz(curr_health(4,Nama4, NewHP4)), addExp(X, 4, Nama4)))
+        ignore((party(1, Nama1), statusKita(NewHP1, _, _, _, Nama1, _, _, 1), retract(curr_health(1,Nama1,_, 1)), assertz(curr_health(1,Nama1, NewHP1, 1)), addExp(X, 1, Nama1))),
+        ignore((party(2, Nama2), statusKita(NewHP2, _, _, _, Nama2, _, _, 2), retract(curr_health(2,Nama2,_, 1)), assertz(curr_health(2,Nama2, NewHP2, 1)), addExp(X, 2, Nama2))),
+        ignore((party(3, Nama3), statusKita(NewHP3, _, _, _, Nama3, _, _, 3), retract(curr_health(3,Nama3,_, 1)), assertz(curr_health(3,Nama3, NewHP3, 1)), addExp(X, 3, Nama3))),
+        ignore((party(4, Nama4), statusKita(NewHP4, _, _, _, Nama4, _, _, 4), retract(curr_health(4,Nama4,_, 1)), assertz(curr_health(4,Nama4, NewHP4, 1)), addExp(X, 4, Nama4)))
     ; myTurn ->
         nl, handle_player_turn, nl
     ; handle_enemy_turn
@@ -281,7 +281,7 @@ damage_skill(Power, Elmt) :-
         retract(statusKita(CurHP, MaxHP, ATK, DEF, Defender, ID, Type, Index)),
         NewHP is max(0, CurHP - Damage),
         assertz(statusKita(NewHP, MaxHP, ATK, DEF, Defender, ID, Type, Index)),
-        retract(curr_health(Index, Defender, _)), assertz(curr_health(Index, Defender, NewHP))
+        retract(curr_health(Index, Defender, _, 1)), assertz(curr_health(Index, Defender, NewHP, 1))
     ),
     format('Serangan memberikan ~w damage ke ~w. Sisa HP: ~w~n', [Damage, Defender, NewHP]).
 

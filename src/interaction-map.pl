@@ -96,10 +96,10 @@ interactPcenter(_):-
 
 update_all_poke_hp_to_max :-
     forall(
-        ( retract(curr_health(Index, Party, _)),
+        ( retract(curr_health(Index, _, _, Party)),
           poke_stats(HP, _, _, _, Index, Party)
         ),
-        assert(curr_health(Index, Party, HP))
+        assert(curr_health(Index, Party, HP, 1))
     ).
 
 /* Currently: Replace the old tile with 0 */
