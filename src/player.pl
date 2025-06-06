@@ -129,7 +129,7 @@ statsUp(Lev, X, No_inven, BaseEXP):-
     write('Health: '), write(HP1),nl,
     write('ATK: '), write(ATK1),nl,
     write('DEF: '), write(DEF1), nl,
-    (NewLev >= 10 -> evolve(No_inven); true).
+    ignore((NewLev >= 10 -> canevolve(X), evolve(No_inven); true)).
 
 addExp(X, Idx, Nama) :- 
     level(Lev,Nama,Idx, Exp, 1),

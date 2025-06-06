@@ -11,6 +11,7 @@
 :- dynamic(player_level/1).
 :- dynamic(enemy_level/1).
 :- dynamic(atkindex/1).
+:- dynamic(enemyskill/1).
 
 random_between(Low, High, R) :-
     Range is High - Low + 1,
@@ -348,6 +349,43 @@ damage_skill(Power, Elmt) :-
     ),
     format('Serangan memberikan ~w damage ke ~w. Sisa HP: ~w~n', [Damage, Defender, NewHP]), nl.
 
+damage_skill_all_exceptatkindex(Power, Elmt) :-
+    atkindex(AtkIndex),
+    ( integer(Power) -> P = Power ; P is round(Power) ),
+    statusLawan(_, _, ATK, _, _, _, _),
+    defendStatus(DefMul, _),
+    damage_loop(1, AtkIndex, P, Elmt, ATK, DefMul).
+
+damage_loop(5, _, _, _, _, _) :- !.  % selesai iterasi sampai 4
+damage_loop(I, AtkIndex, Power, Elmt, ATK, DefMul) :-
+    ( I =\= AtkIndex ->
+        (
+            ( party(I, Defender),
+              poke_stats(_, _, DEFD, Defender, I, 1),
+              curr_health(_, Defender, CurHP, 1),
+              type(Type, Defender),
+              (
+                  superEffective(Elmt, Type) -> Mult = 1.5,
+                      write('It is very effective...'), nl
+              ;   notEffective(Elmt, Type) -> Mult = 0.5,
+                      write('It is not very effective...'), nl
+              ;   Mult = 1
+              ),
+              Temp is float(DEFD) * float(DefMul),
+              TempRounded is round(Temp),
+              DEFAdj is max(1, TempRounded),
+              DamageFloat is Mult * Power * ATK / float(DEFAdj) / 5,
+              Damage is max(1, round(DamageFloat)),
+              retract(curr_health(I, Defender, CurHP, 1)),
+              NewHP is max(0, CurHP - Damage),
+              assertz(curr_health(I, Defender, NewHP, 1)),
+              format('Serangan memberikan ~w damage ke ~w. Sisa HP: ~w~n', [Damage, Defender, NewHP])
+            ) -> true ; true
+        )
+    ; true),
+    I1 is I + 1,
+    damage_loop(I1, AtkIndex, Power, Elmt, ATK, DefMul).
+
 calculate_damage(Power, Damage, Elmt) :-
     ( integer(Power) -> P = Power ; P is round(Power) ),
     ( myTurn ->
@@ -415,6 +453,11 @@ apply_ability(sleep(Turns), _) :-
     ),
     write('Efek sleep diterapkan ke '), write(Nama),
     write('! Akan tertidur selama '), write(Turns), write(' turn.'), nl.
+
+apply_ability(area, _) :-
+    enemyskill(NamaSkill),
+    skills(NamaSkill, AtkType, Power, _, _),
+    damage_skill_all_exceptatkindex(Power, AtkType).
 
 % ----------------------
 % Efek Turn
@@ -524,11 +567,14 @@ enemy_action :-
     ).
 
 enemy_use_skill(NamaSkill) :-
+    retractall(enemyskill(_)),
     statusLawan(_, _, _, _, Name, _, _),
     skills(NamaSkill, AtkType, Power, Ability, Chance),
+    assertz(enemyskill(NamaSkill)),
     format('~w used ~w!~n', [Name, NamaSkill]),
     damage_skill(Power, AtkType),
     apply_ability(Ability, Chance),
+    retractall(enemyskill(_)),
     toggle_turn,
     turn.
 

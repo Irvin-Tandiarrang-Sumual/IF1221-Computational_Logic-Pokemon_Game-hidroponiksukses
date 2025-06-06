@@ -43,6 +43,8 @@ starter(1, charmander).
 starter(2, squirtle).
 starter(3, pidgey).
 
+canevolve(charmander).
+canevolve(squirtle).
 
 legendary(articuno).
 legendary(mewtwo).
@@ -61,7 +63,7 @@ base_stats(40, 12, 15, wartortle).
 base_stats(250, 300, 250, mewtwo).
 
 /* level Pokemon */
-/* level(Level, Nama_pokemon, Slot_Inventory, EXP_Counter) */
+/* level(Level, Nama_pokemon, Slot_Inventory, EXP_Counter, Boolean_party) */
 init_starter:- asserta(level(1,pidgey,0, 0, -1)), asserta(level(1,charmander,0, 0, -1)), asserta(level(1,squirtle,0, 0, -1)).
 
 /* Poke stats */
@@ -142,3 +144,4 @@ pokeSkill(pikachu, thunder_shock, quick_attack).
 pokeSkill(geodude, tackle, rock_throw).
 pokeSkill(snorlax, tackle, rest).
 pokeSkill(articuno, gust, ice_shard).
+pokeSkill(mewtwo, psychic_blast, mind_shock).
