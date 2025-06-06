@@ -55,7 +55,7 @@ pilih_pokemon :-
             init_poke(Index),
             !
         ;
-        write('Pilihan tidak valid atau Pokémon sudah tumbang, silakan pilih lagi.~n'),
+        write('Pilihan tidak valid atau Pokémon sudah tumbang, silakan pilih lagi.'), nl,
         fail
     ).
 
@@ -304,8 +304,13 @@ skill(SkillNumber) :-
     % Jalankan
     skills(NamaSkill, AtkType, Power, Ability, Chance),
     format('~w used ~w!~n', [NamaPokemon, NamaSkill]),
-    damage_skill(Power,  AtkType),
+    
+    ( Power > 0 ->
+        damage_skill(Power, AtkType)
+    ; true ),  % tidak menyerang jika Power = 0
+
     apply_ability(Ability, Chance),
+
     % Update cooldown setelah penggunaan
     ( SkillNumber =:= 1 ->
         retract(cooldown_kita(_, CD2)),
@@ -313,7 +318,8 @@ skill(SkillNumber) :-
     ;
         retract(cooldown_kita(CD1, _)),
         assertz(cooldown_kita(CD1, NewCD2))
-    ), toggle_turn,
+    ), 
+    toggle_turn,
     turn.
 
 damage_skill(Power, Elmt) :-
