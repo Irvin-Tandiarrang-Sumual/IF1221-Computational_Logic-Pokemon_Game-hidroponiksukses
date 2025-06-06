@@ -10,7 +10,7 @@
 :- dynamic(cooldown_lawan/2).
 :- dynamic(player_level/1).
 :- dynamic(enemy_level/1).
-
+:- dynamic(atkindex/1).
 
 random_between(Low, High, R) :-
     Range is High - Low + 1,
@@ -53,7 +53,7 @@ pilih_pokemon :-
         curr_health(Index, Name, HP, 1),
         HP > 0 ->
             format('Kamu memilih ~w sebagai Pokemon utama!~n', [Name]),
-            init_poke(Index),!
+            init_poke(Index), retractall(atkindex(_)), asserta(atkindex(Index)),!
         ;
         write('Pilihan tidak valid atau Pokémon sudah tumbang, silakan pilih lagi.'), nl,
         fail
@@ -68,7 +68,7 @@ init_poke(Index) :-
     party(Index, Nama),
     level(LevelKita,Nama,Index, _, 1),
     poke_stats(MaxHPKita, ATKKita, DEFKita, Nama, Index, 1),
-    curr_health(Index,Nama, CurrHPKita, 1),
+    curr_health(Index, Nama, CurrHPKita, 1),
     type(Type, Nama),
     retractall(statusKita(_, _, _, _, _, _, _, Index)),
     assertz(statusKita(CurrHPKita, MaxHPKita, ATKKita, DEFKita, Nama, ID, Type, Index)),
@@ -153,6 +153,7 @@ battle(Rarity) :-
 
 get_status(HP, MaxHP, ATK, DEF, Nama, ID) :-
     ( myTurn ->
+        atkindex(Index),
         statusKita(CurrHPKita, MaxHPKita, ATKKita, DEFKita, Nama, ID, Type, Index)
     ; 
         statusLawan(MaxHP, MaxHP, ATK, DEF, Nama, 99, Type)
@@ -160,6 +161,7 @@ get_status(HP, MaxHP, ATK, DEF, Nama, ID) :-
 
 update_status(HP, MaxHP, ATK, DEF, Nama, ID) :-
     ( myTurn ->
+        atkindex(Index),
         retractall(statusKita(_, _, _, _, _, ID, Type, Index)),
         assertz(statusKita(HP, MaxHP, ATK, DEF, Nama, ID, Type, Index))
     ; 
@@ -172,21 +174,24 @@ ignore(_).
 
 turn :-
     situation(ongoing), !,
+    atkindex(Index),
     apply_turn_effects,
     reset_defend,
-    statusKita(HP1, _, _, _, Name1, _, _, _),
+    statusKita(HP1, _, _, _, Name1, _, _, Index),
     statusLawan(HP2, _, _, _, Name2, _, _),
     (
         HP1 =< 0 ->
             format('~w tumbang!~n', [Name1]),
-            retractall(curr_health(1, Name1, _, 1)),
-            assertz(curr_health(1, Name1, 0, 1)),
+            party(Index, Name1),
+            curr_health(Index, Name1, 0, 1),
             retractall(statusEfekKita(_)),
             ( has_alive_pokemon ->
                 write('Pilih Pokémon pengganti:\n'),
                 retract(statusKita(0, _, _, _, Name1, _, _, _)),
                 daftar_party,
                 pilih_pokemon,
+                retractall(myTurn),
+                assertz(myTurn),
                 turn
             ;
                 write('Semua Pokemonmu sudah kalah. Kamu kalah total...\n'),
@@ -196,11 +201,14 @@ turn :-
     ; HP2 =< 0 ->
         format('Pokemon ~w kalah! Kamu menang!~n', [Name2]),
         forall(
-            (party(Index, Name), statusKita(HP, _, _, _, Name, _, _, Index)),
+            (party(Index, Name), curr_health(Index, Name, HP, 1)),
             (
+                enemy_level(X), rarity(Rarity, _, Y, _), Expgiven is Y + X*2,
                 retractall(curr_health(Index, Name, _,1)),
-                assertz(curr_health(Index, Name, HP,1)),
-                addExp(X, Index, Name)
+                assertz(curr_health(Index, Name, HP, 1)),
+                addExp(Expgiven, Index, Name),
+                retractall(situation(_)),
+                assertz(situation(win))
             )
         )
     ; myTurn ->
@@ -277,6 +285,7 @@ attack :-
 
 skill(SkillNumber) :-
     myTurn,
+    atkindex(Index),
     statusKita(_, _, _, _, NamaPokemon, _, _, Index),
     level(Level, NamaPokemon, Index, _, 1),
     cooldown_kita(CD1, CD2),
@@ -332,6 +341,7 @@ damage_skill(Power, Elmt) :-
         NewHP is max(0, CurHP - Damage),
         assertz(statusLawan(NewHP, MaxHP, ATK, DEF, Defender, 99, Type))
     ; 
+        atkindex(Index),
         retract(statusKita(CurHP, MaxHP, ATK, DEF, Defender, ID, Type, Index)),
         NewHP is max(0, CurHP - Damage),
         assertz(statusKita(NewHP, MaxHP, ATK, DEF, Defender, ID, Type, Index)),
@@ -387,6 +397,7 @@ apply_ability(lower_atk(N), _) :-
         assertz(statusLawan(HP, MaxHP, NewATK, DEF, Nama, ID, Type)),
         write(Nama), write(' ATK berkurang sebanyak '), write(N), nl
     ;
+        atkindex(Index),
         statusKita(HP, MaxHP, ATK, DEF, Nama, ID, Type, Index),
         NewATK is max(1, ATK - N),
         retract(statusKita(HP, MaxHP, ATK, DEF, Nama, ID, Type, Index)),
@@ -397,6 +408,7 @@ apply_ability(paralyze, _) :-
     ( myTurn -> assertz(statusEfekLawan(paralyze)) ; assertz(statusEfekKita(paralyze)) ),
     write('Efek paralysis diterapkan! Mungkin gagal menyerang.'), nl.
 apply_ability(heal(Ratio), _) :-
+    atkindex(Index),
     statusKita(CurHP, MaxHP, ATK, DEF, Nama, ID, Type, Index),
     Heal is round(MaxHP * Ratio),
     NewHP is min(MaxHP, CurHP + Heal),

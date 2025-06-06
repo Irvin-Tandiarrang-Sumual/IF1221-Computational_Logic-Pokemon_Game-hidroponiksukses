@@ -148,4 +148,4 @@ invenswitch(Inven, Party):-
     assertz(poke_stats(HPi, ATKi, DEFpi, Pokemoni, Party1, 1)),
     assertz(curr_health(Party1, Pokemoni, CurrHpi, 1)),
     assertz(level(Leveli, Pokemoni, Party1, Counteri, 1)),
-    assertz(party(Party,Pokemoni)).
+    assertz(party(Party1,Pokemoni)).
