@@ -151,17 +151,20 @@ battle(Rarity) :-
     % Mulai giliran
     turn.
 
-get_status(HP, MaxHP, ATK, DEF, Nama, ID, Type) :-
-    ( myTurn -> statusKita(HP, MaxHP, ATK, DEF, Nama, ID, Type, Index)
-    ; statusLawan(HP, MaxHP, ATK, DEF, Nama, ID, Type) ).
-
-update_status(NewHP, MaxHP, ATK, DEF, Nama, ID, Type) :-
+get_status(HP, MaxHP, ATK, DEF, Nama, ID) :-
     ( myTurn ->
-        retract(statusKita(_, _, _, _, _, _, _, _)),
-        assertz(statusKita(NewHP, MaxHP, ATK, DEF, Nama, ID, Type, Index))
+        statusKita(HP, MaxHP, ATK, DEF, Nama, _, _, ID)
     ; 
-        retract(statusLawan(_, _, _, _, _, _, _)),
-        assertz(statusLawan(NewHP, MaxHP, ATK, DEF, Nama, ID, Type))
+        statusLawan(HP, MaxHP, ATK, DEF, Nama, ID)
+    ).
+
+update_status(HP, MaxHP, ATK, DEF, Nama, ID) :-
+    ( myTurn ->
+        retractall(statusKita(_, _, _, _, _, _, _, ID)),
+        assertz(statusKita(HP, MaxHP, ATK, DEF, Nama, 1, _, ID))
+    ; 
+        retractall(statusLawan(_, _, _, _, _, ID)),
+        assertz(statusLawan(HP, MaxHP, ATK, DEF, Nama, ID))
     ).
 
 ignore(Goal) :- call(Goal), !.
