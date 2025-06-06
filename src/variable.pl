@@ -3,10 +3,9 @@
 :- dynamic(jml_inventory/1).
 :- dynamic(playerPos/2).
 :- dynamic(base_stats/4).
-:- dynamic(poke_stats/5).
+:- dynamic(poke_stats/6).
 :- dynamic(posisiPokemon/3).
 :- dynamic(battleNow/1).
-:- dynamic(curr_health/2).
 :- dynamic(isOnPoke/1).
 :- dynamic(isBattle/1).
 :- dynamic(level/4).
@@ -25,6 +24,7 @@ pokemon(6, pikachu, rare).
 pokemon(7, geodude, rare).
 pokemon(8, snorlax, epic).
 pokemon(9, articuno, legendary).
+pokemon(10, mewtwo, legendary).
 
 /* Type */
 /* type(Type, Nama_pokemon) */
@@ -58,14 +58,14 @@ base_stats(35, 15, 10, charmander).
 base_stats(40, 12, 15, squirtle).
 base_stats(35, 15, 10, charmeleon).
 base_stats(40, 12, 15, wartortle).
-base_stats(250, 300, 250, wartortle).
+base_stats(250, 300, 250, mewtwo).
 
 /* level Pokemon */
-/* level(Level, Nama_pokemon, Slot_Inventory, EXP_Counter, Boolean_Party) */
+/* level(Level, Nama_pokemon, Slot_Inventory, EXP_Counter) */
 init_starter:- asserta(level(1,pidgey,0, 0, 0)), asserta(level(1,charmander,0, 0, 0)), asserta(level(1,squirtle,0, 0, 0)).
 
 /* Poke stats */
-/* poke_stats(HP, ATK, DEF, Nama_pokemon, Slot_Inventory) */
+/* poke_stats(HP, ATK, DEF, Nama_pokemon, Slot_Inventory, Boolean_party) */
 
 /* modifier */
 /* superEffective(T1,T2) : T1 is super effective against T2 */
@@ -96,25 +96,29 @@ notEffective(ice, water).
 notEffective(ice, ice).
 notEffective(normal, rock).
 
-/* Skill */
-/* skill(Nama_skill, Type, Power, Ability, Ability_chance) */
-skill(tackle, normal, 35, none, 0).
-skill(scratch, normal, 35, none, 0).
-skill(ember, fire, 40, burn(2, 3), 1.0).
-skill(water_gun, water, 40, none, 0).
-skill(gust, flying, 30, none, 0).
-skill(fire_spin, fire, 35, burn(2, 5), 1.0).
-skill(bubble, water, 30, lower_atk(3), 1.0).
-skill(thunder_shock, electric, 40, paralyze, 0.2).
-skill(quick_attack, normal, 30, none, 0).
-skill(rock_throw, rock, 50, none, 0).
-skill(rest, normal, 0, heal(0.4), 1.0).
-skill(ice_shard, ice, 40, none, 0).
-skill(psychic_blast, psychic, 25, paralyze, 0.2).
-skill(mind_shock, psychic, 20, area, 1.0).
+/* skills */
+/* skills(Nama_skills, Type, Power, Ability, Ability_chance) */
+skills(tackle, normal, 35, none, 0).
+skills(scratch, normal, 35, none, 0).
+skills(ember, fire, 40, burn(2, 3), 1.0).
+skills(water_gun, water, 40, none, 0).
+skills(gust, flying, 30, none, 0).
+skills(fire_spin, fire, 35, burn(2, 5), 1.0).
+skills(bubble, water, 30, lower_atk(3), 1.0).
+skills(thunder_shock, electric, 40, paralyze, 0.2).
+skills(quick_attack, normal, 30, none, 0).
+skills(rock_throw, rock, 50, none, 0).
+skills(rest, normal, 0, [heal(1.0), sleep(2)], 1.0).
+skills(ice_shard, ice, 40, none, 0).
+skills(psychic_blast, psychic, 25, paralyze, 0.2).
+skills(mind_shock, psychic, 20, area, 1.0).
 
 isOnPoke(0).
 isBattle(0).
+
+/* special trait mewtwo dengan id 10*/
+/* immune_status(id pokemon) */
+immune_status(10).
 
 /* Rarity */
 /* rarity(Rarity, BaseEXP, BaseEXPGiven, CatchRate) */
@@ -122,3 +126,19 @@ rarity(common, 20, 10, 40).
 rarity(rare, 30, 20, 30).
 rarity(epic, 40, 30, 25).
 rarity(legendary, 50, 40, 20).
+
+catch_rate(common, 40).
+catch_rate(rare, 30).
+catch_rate(epic, 25).
+catch_rate(legendary, 10).
+
+% pokeSkill(Nama, Skill1, Skill2)
+pokeSkill(charmander, scratch, ember).
+pokeSkill(squirtle, tackle, water_gun).
+pokeSkill(pidgey, tackle, gust).
+pokeSkill(charmeleon, ember, fire_spin).
+pokeSkill(wartortle, water_gun, bubble).
+pokeSkill(pikachu, thunder_shock, quick_attack).
+pokeSkill(geodude, tackle, rock_throw).
+pokeSkill(snorlax, tackle, rest).
+pokeSkill(articuno, gust, ice_shard).

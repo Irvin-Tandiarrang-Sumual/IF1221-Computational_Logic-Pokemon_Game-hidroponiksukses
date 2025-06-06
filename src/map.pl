@@ -185,7 +185,8 @@ replace_common_positions(Matrix, [(X,Y)|T], ResultMatrix) :-
 
 random_player_pos((X, Y)) :-
     map(Matrix),
-    findall((I, J), (nth0(I, Matrix, Row), nth0(J, Row, ' ')), ZeroTiles), random_member((X, Y), ZeroTiles).
+    findall((I, J), (nth0(I, Matrix, Row), nth0(J, Row, ' ')), ZeroTiles), random_member((X, Y), ZeroTiles),
+    update_player(X,Y).
 
 place_random_p :-
     random_player_pos((X, Y)),
@@ -217,22 +218,14 @@ place_random_h :-
     retractall(map(_)),
     assertz(map(NewMatrix)).
 
-pcenter :- pcenter_step(X).
-
-pcenter_step(X) :-
-    p_step(X),
-    wait_enter,
-    X1 is X + 1,
-    (X1 =< 2 -> pcenter_step(X1); true).
-
-p_step(0) :- pcenter_ascii.
-p_step(1) :- nursejoy_ascii.
-p_step(2) :- nursejoy_w_ascii.
-
 /* Additional Information for Player and PokeCenter */
 print_info_p :-
     map(Matrix),
-    findall((X,Y), (nth0(X, Matrix, Row), nth0(Y, Row, Tile), Tile = 'P'), PlayerPositions),
+    player(A, B, C, D, E, PX, PY),
     findall((I,J), (nth0(I, Matrix, Row), nth0(J, Row, Tile), Tile = 'H'), PcenterPositions),
-    forall(member((PX,PY), PlayerPositions), format("Player at (~d,~d)~n", [PX,PY])),
+    format("Player at (~d,~d)~n", [PX,PY]),
     forall(member((HX,HY), PcenterPositions), format("PokeCenter at (~d,~d)~n", [HX,HY])).
+
+update_player(X, Y) :-
+    retract(player(A, B, C, D, E, _, _)),        
+    assertz(player(A, B, C, D, E, X,Y)).  
