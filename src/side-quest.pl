@@ -5,7 +5,7 @@ quiz_pokemon(NamaPokemon) :-
     type(X, NamaPokemon),
     ( X == Answer ->
         write('Jawaban benar!'), nl,
-        statusKita(CurHP, MaxHP, ATK, DEF, Nama, Level),
+        statusKita(CurHP, MaxHP, ATK, DEF, Nama, Level, Type, Slot),
         retract(level(Level, Nama, Slot, Exp)),
         Exp1 is Exp + 25,
         assertz(level(Level, Nama, Slot, Exp1)),

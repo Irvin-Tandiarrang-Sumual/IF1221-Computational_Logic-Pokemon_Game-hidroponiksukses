@@ -6,7 +6,7 @@
 :- dynamic(idAv/1).
 /* party: (Inventory index (start from 1), Pokemon_name) */
 :- dynamic(party/2).
-/* curr_health : (Indeks, Boolean_party, CurrHP)*/
+/* curr_health : (Indeks, Nama, CurrHP)*/
 :- dynamic(curr_health/3).
 /* TODO */
 :- dynamic(isSkillUsed_Self/2).
@@ -15,6 +15,7 @@
 
 /* Initiating to choose starter */
 chooseStarter:-  findall(X,starter(X),ListStarter),
+    retractall(curr_health(_, _, _)),
     writeList(ListStarter),
     write('Choose your POKeMON'),nl,
     /* Choosing 2 starter */
@@ -30,14 +31,14 @@ starterToInventory(X, Y) :-
     /* Setting stats for choosen starter 1 (X) */
     base_stats(HP1, ATK1, DEF1, X),
     asserta(poke_stats(HP1, ATK1, DEF1, X, 1, 1)),
-    asserta(curr_health(1,1,HP1)),
+    assertz(curr_health(1,X,HP1)),
     asserta(isSkillUsed_Self(1,0)),
     add_to_party(1, X),
     asserta(jml_inventory(1)),
     /* Setting stats for choosen starter 2 (Y) */
     base_stats(HP2, ATK2, DEF2, Y),
     asserta(poke_stats(HP2, ATK2, DEF2, Y, 2, 1)),
-    asserta(curr_health(2,1,HP2)),
+    assertz(curr_health(2,Y,HP2)),
     asserta(isSkillUsed_Self(2,0)),
     add_to_party(2, Y),
     asserta(jml_inventory(2)),
@@ -71,12 +72,13 @@ showStatusList([[No_invenH, XH]|T]) :-
     No_invenH > 0,
     party(No_invenH, XH),      % Jika predicate party dipakai seperti ini
     poke_stats(HP, _, _, _, No_invenH, 1),
+    curr_health(No_invenH, XH, CurrHP),
     pokemon(_, XH, Rarity),
     rarity(Rarity, BaseEXP, _, _),
     type(Type, XH),
     level(Lev, XH, No_invenH, Exp, 1),
     write('Name : '), write(XH), nl,
-    write('Health: '), write(HP), nl,
+    write('Health: '), write(CurrHP), write('/'), write(HP), nl,
     write('Type: '), write(Type), nl,
     write('Level: '), write(Lev), nl,
     ExpCap is BaseEXP * Lev,
