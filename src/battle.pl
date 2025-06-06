@@ -123,9 +123,7 @@ pokeRandomizer(epic, Nama) :-
     findall(N, pokemon(_, N, epic), EpicList),
     random_member(Nama, EpicList).
 
-pokeRandomizer(legendary, Nama) :-
-    findall(N, pokemon(_, N, legendary), LegendaryList),
-    random_member(Nama, LegendaryList).
+pokeRandomizer(legendary, articuno).
 
 battle(Rarity) :-
     retractall(situation(_)),
