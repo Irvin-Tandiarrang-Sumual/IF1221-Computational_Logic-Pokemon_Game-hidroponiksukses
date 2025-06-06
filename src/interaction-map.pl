@@ -40,7 +40,7 @@ move(DX, DY) :-
     NewY is OldY + DY,
     check_valid_move(Matrix, NewX, NewY),
     nth0(NewX, Matrix, NewRow), nth0(NewY, NewRow, DestTile),
-
+    
     /* Update position */
     ( last_player_tile(TileToRestore) -> true ; TileToRestore = ' ' ),
     replace_in_matrix(Matrix, (OldX, OldY), TileToRestore, TempMatrix),
@@ -48,14 +48,16 @@ move(DX, DY) :-
     retractall(map(_)), assertz(map(NewMatrix)),
     retractall(last_player_tile(_)),
     assertz(last_player_tile(DestTile)),
-    ( last_player_tile('H') -> pcenter ; true),
+    ( last_player_tile('H') -> pcenter 
+    ; 
+    write('HP Pokemon dipulihkan sebanyak 20% dari total max HP masing-masing.'), nl, nl, update_all_poke_hp_twenty),
+
+    /* Print current moves left */
 
     /* Update current moves left */
     NewMovesLeft is MovesLeft - 1,
     retract(remaining_moves(_)), assertz(remaining_moves(NewMovesLeft)),
-    /* Print current moves left */
-    format("Moves left: ~d~n", [NewMovesLeft]),
-    write('HP Pokemon dipulihkan sebanyak 20% dari total max HP masing-masing.'), nl.
+    format("Moves left: ~d~n", [NewMovesLeft]),nl.
 
 move(_, _) :-
     remaining_moves(0),
@@ -63,10 +65,10 @@ move(_, _) :-
     fail.
 
 /* Player's movement */
-moveUp :- write('Kamu bergerak ke atas'), move(-2,0), check_player_pokemon.
-moveLeft :- write('Kamu bergerak ke kiri'), move(0,-2), check_player_pokemon.
-moveDown :- write('Kamu bergerak ke bawah'), move(2,0), check_player_pokemon.
-moveRight :- write('Kamu bergerak ke kanan'), move(0,2), check_player_pokemon.
+moveUp :- write('Kamu bergerak ke atas'),nl, move(-2,0), check_player_pokemon.
+moveLeft :- write('Kamu bergerak ke kiri'),nl, move(0,-2), check_player_pokemon.
+moveDown :- write('Kamu bergerak ke bawah'),nl, move(2,0), check_player_pokemon.
+moveRight :- write('Kamu bergerak ke kanan'),nl, move(0,2), check_player_pokemon.
 
 /* PokeCenter's interaction feature */
 
@@ -96,10 +98,21 @@ interactPcenter(_):-
 
 update_all_poke_hp_to_max :-
     forall(
-        ( retract(curr_health(Index, _, _, Party)),
-          poke_stats(HP, _, _, _, Index, Party)
+        ( retract(curr_health(Index, Pokemon, _, Party)),
+          poke_stats(HP, _, _, Pokemon, Index, Party)
         ),
-        assert(curr_health(Index, Party, HP, 1))
+        assertz(curr_health(Index, Pokemon, HP, Party))
+    ).
+
+/* poke_stats(HP, ATK, DEF, Nama_pokemon, Slot_Inventory, Boolean_party) */
+/* curr_health : (Indeks, Nama, CurrHP, Bool_party)*/
+update_all_poke_hp_twenty:-
+    forall(
+        ( retract(curr_health(Index, Pokemon, HP, Party)),
+          poke_stats(HP2, _, _, Pokemon, Index, Party),
+          HP1 is HP * 1.2
+        ),
+        ( HP2 < HP1 -> assertz(curr_health(Index, Pokemon, HP2, Party)); assertz(curr_health(Index, Pokemon, HP1, Party)))
     ).
 
 /* Currently: Replace the old tile with 0 */
