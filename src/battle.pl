@@ -199,6 +199,7 @@ turn :-
                 retract(statusKita(0, _, _, _, Name1, _, _, _)),
                 daftar_party,
                 pilih_pokemon,
+                retractall(statusEfekKita(_, _)),
                 retractall(myTurn),
                 assertz(myTurn),
                 turn
@@ -206,6 +207,8 @@ turn :-
                 write('Semua Pokemonmu sudah kalah. Kamu kalah total...\n'),
                 retractall(situation(_)),
                 assertz(situation(lose)),
+                retractall(statusKita(_,_,_,_,_,_,_,_)),
+                retractall(statusLawan(_,_,_,_,_,_,_)),
                 remaining_moves(SisaMove),
                 (SisaMove =< 0 -> check_endgame ; true)
 
@@ -225,6 +228,8 @@ turn :-
         ),
         retractall(situation(_)),
         assertz(situation(win)), 
+        retractall(statusKita(_,_,_,_,_,_,_,_)),
+        retractall(statusLawan(_,_,_,_,_,_,_)),
         remaining_moves(SisaMove),
         (SisaMove =< 0 -> check_endgame ; true),
         retractall(situation(_))
