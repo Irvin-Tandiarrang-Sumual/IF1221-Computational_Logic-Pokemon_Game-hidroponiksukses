@@ -64,7 +64,7 @@ catch_pokemon(Pokemon) :-
     ).
 
 /* Menampilkan inventori */
-show_bag :-
+showBag :-
     nl, write('=== Isi Inventory (40 slot) ==='), nl,
     show_inventory(0).
 
