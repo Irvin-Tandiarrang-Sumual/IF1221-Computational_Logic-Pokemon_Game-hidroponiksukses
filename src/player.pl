@@ -35,14 +35,12 @@ starterToInventory(X, Y) :-
     assertz(curr_health(1, NamaX, HP1, 1)),
     asserta(isSkillUsed_Self(1,0)),
     add_to_party(1, NamaX),
-    asserta(jml_inventory(1)),
     /* Setting stats for choosen starter 2 (Y) */
     base_stats(HP2, ATK2, DEF2, NamaY),
     asserta(poke_stats(HP2, ATK2, DEF2, NamaY, 2, 1)),
     assertz(curr_health(2, NamaY, HP2, 1)),
     asserta(isSkillUsed_Self(2,0)),
     add_to_party(2, NamaY),
-    asserta(jml_inventory(2)),
     write(NamaX), write(' & '), write(NamaY), write(' is now your partner!'),nl, !.
 
 /* Print all starter to console */

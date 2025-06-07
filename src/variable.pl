@@ -1,16 +1,7 @@
-:- dynamic(inventory/1).
-:- dynamic(legendary/1).
-:- dynamic(jml_inventory/1).
-:- dynamic(playerPos/2).
 :- dynamic(base_stats/4).
 :- dynamic(poke_stats/6).
-:- dynamic(posisiPokemon/3).
-:- dynamic(battleNow/1).
-:- dynamic(isOnPoke/1).
-:- dynamic(isBattle/1).
 :- dynamic(level/5).
 :- dynamic(skill/5).
-:- dynamic(health/2).
 
 /* Pokemon */
 /* List pokemon */
@@ -45,9 +36,6 @@ starter(3, pidgey).
 
 canevolve(charmander).
 canevolve(squirtle).
-
-legendary(articuno).
-legendary(mewtwo).
 
 /* Base stats */
 /* base_stats(HP, ATK, DEF, Nama_pokemon) */
@@ -114,9 +102,6 @@ skills(rest, normal, 0, [heal(1.0), sleep(2)], 1.0).
 skills(ice_shard, ice, 40, none, 0).
 skills(psychic_blast, psychic, 25, paralyze, 0.2).
 skills(mind_shock, psychic, 20, area, 1.0).
-
-isOnPoke(0).
-isBattle(0).
 
 /* special trait mewtwo dengan id 10*/
 /* immune_status(id pokemon) */
