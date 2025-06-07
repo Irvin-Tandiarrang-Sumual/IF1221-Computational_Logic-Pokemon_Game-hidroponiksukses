@@ -111,7 +111,8 @@ interactPcenter(heal):-
     assertz(pcentervisit(X1)),
     write('|    Nurse Joy: Here you go dear, I have recovered all of your pokemon to full HP!'),nl,nl
     ;
-    write('|    Nurse Joy: I am very sorry! But you have reached the limit of your visit, do try again!'), nl, nl
+    write('|    Nurse Joy: I am very sorry! But you have reached the limit of your visit, good luck!'), nl,
+    write('(System: You are only allowed to visit twice!)'), nl, nl
     ).
 
 interactPcenter(_):-
