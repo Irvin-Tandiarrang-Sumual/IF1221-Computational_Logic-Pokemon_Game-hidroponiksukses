@@ -1,4 +1,3 @@
-:- use_module(library(random)).
 :- dynamic(myTurn/0).
 :- dynamic(situation/1).
 :- dynamic(statusKita/8).
@@ -116,15 +115,15 @@ buat_lawan(Rarity) :-
 % Pilih pokemon secara acak berdasarkan rarity
 pokeRandomizer(common, Nama) :-
     findall(N, pokemon(_, N, common), CommonList),
-    random_member(Nama, CommonList).
+    random_member_battle(Nama, CommonList).
 
 pokeRandomizer(rare, Nama) :-
     findall(N, pokemon(_, N, rare), RareList),
-    random_member(Nama, RareList).
+    random_member_battle(Nama, RareList).
 
 pokeRandomizer(epic, Nama) :-
     findall(N, pokemon(_, N, epic), EpicList),
-    random_member(Nama, EpicList).
+    random_member_battle(Nama, EpicList).
 
 pokeRandomizer(legendary, articuno).
 
@@ -601,7 +600,7 @@ enemy_action :-
         ( member(A, [1,2,3,4]),
           ( A = 3 -> CD1 =:= 0 ; A = 4 -> CD2 =:= 0, Level >= 5 ; true )),
         Actions),
-    ( Actions == [] -> Action = 2 ; random_member(Action, Actions) ),
+    ( Actions == [] -> Action = 2 ; random_member_battle(Action, Actions) ),
     (
       Action = 1 -> defend  % defend saja, selesai
     ; Action = 2 -> attack  % attack biasa
@@ -635,7 +634,7 @@ predict_enemy_defend :-
         ( member(A, [1,2,3,4]),
           ( A = 3 -> CD1 =:= 0 ; A = 4 -> CD2 =:= 0, Level >= 5 ; true )),
         Actions),
-    ( Actions == [] -> Action = 2 ; random_member(Action, Actions) ),
+    ( Actions == [] -> Action = 2 ; random_member_battle(Action, Actions) ),
     (
         Action =:= 1 ->
             % Simulasi AI memilih defend

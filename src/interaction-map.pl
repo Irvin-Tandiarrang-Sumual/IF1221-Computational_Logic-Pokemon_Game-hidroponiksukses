@@ -44,7 +44,7 @@ move(DX, DY) :-
     nth0(NewX, Matrix, NewRow), nth0(NewY, NewRow, DestTile),
     /* Update position */
     ( last_player_tile(TileToRestore) -> true ; TileToRestore = ' ' ),
-    ( pokemap(PokeList), member((Type, (OldX, OldY)), PokeList) -> 
+    ( pokemap(PokeList), member((_, (OldX, OldY)), PokeList) -> 
         replace_in_matrix(Matrix, (OldX, OldY), TileToRestore, TempMatrix) 
         ; 
     (TileToRestore = 'C' -> 
@@ -221,7 +221,7 @@ remove_pokemon_from_map(Pos) :-
     assertz(pokemap(NewList)).
 
 remove_pokes([], _, []).
-remove_pokes([(Name, P)|T], TargetPos, T) :-
+remove_pokes([(_, P)|T], TargetPos, T) :-
     P == TargetPos, !.
 remove_pokes([H|T], TargetPos, [H|Rest]) :-
     remove_pokes(T, TargetPos, Rest).

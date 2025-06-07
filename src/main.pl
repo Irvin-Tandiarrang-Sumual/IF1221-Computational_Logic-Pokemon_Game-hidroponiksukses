@@ -32,6 +32,7 @@ start :-
 
 exit :-
     ( current_predicate(init/0), init ->
+        retractall(init),
         retractall(myTurn),
         retractall(situation(_)),
         retractall(statusKita(_,_,_,_,_,_,_,_)),

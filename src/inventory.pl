@@ -72,7 +72,7 @@ show_inventory(40) :- !.
 show_inventory(Index) :-
     (   item_inventory(Index, Item) -> true ; Item = kosong ),
     Index1 is Index + 1,
-    format('Slot ~w: ', [Index1]),
+    format('Slot ~w : ', [Index1]),
     (Item == empty -> write('Kosong') ; write(Item)),
     nl,
     Next is Index + 1,
@@ -92,10 +92,10 @@ handle_item_drop :-
 /* Item yang mungkin didapat */
 random_item(Item) :-
     Items = [potion, super_potion, hyper_potion, pokeball(empty)],
-    random_member(Item, Items).
+    random_memberinven(Item, Items).
 
 /* Memilih elemen acak dari list */
-random_member(Item, List) :-
+random_memberinven(Item, List) :-
     length(List, Length),
     random(0, Length, Index),
     nth0(Index, List, Item).
@@ -157,7 +157,7 @@ invenswitch(Inven, Party):-
 init_bag(Width, Height) :- generate_bag(Width, Height), assertz(hw(Width,Height)).
 
 /* showBag: Print inv to console */
-showBag :-
+showBag1 :-
     inv(Bag),!,
     nl,nl, write('=========================== My Inventory ============================'),nl,nl,
     print_bag_rows(Bag, 0).
@@ -181,7 +181,7 @@ generate_bag(Width, Height) :-
     assertz(inv(Bag)).
 
 /* generate_row_bs_b: Create row */
-generate_row_bs_b(I, Height, Width, []) :- I > Height.
+generate_row_bs_b(I, Height, _, []) :- I > Height.
 generate_row_bs_b(I, Height, Width, [Row|T]) :-
     I =< Height,
     generate_row_b(I, Width, Row),
