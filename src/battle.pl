@@ -627,11 +627,11 @@ enemy_action :-
     ; Action = 3 -> 
         enemy_use_skill(S1),
         retractall(cooldown_lawan(_, _)),
-        assertz(cooldown_lawan(1, CD2))
+        assertz(cooldown_lawan(2, CD2))
     ; Action = 4 ->
         enemy_use_skill(S2),
         retractall(cooldown_lawan(_, _)),
-        assertz(cooldown_lawan(CD1, 2))
+        assertz(cooldown_lawan(CD1, 3))
     ).
 
 enemy_use_skill(NamaSkill) :-
@@ -640,7 +640,9 @@ enemy_use_skill(NamaSkill) :-
     skills(NamaSkill, AtkType, Power, Ability, Chance),
     assertz(enemyskill(NamaSkill)),
     format('~w used ~w!~n', [Name, NamaSkill]),
-    damage_skill(Power, AtkType),
+    ( Power > 0 ->
+        damage_skill(Power, AtkType)
+    ; true ),
     apply_ability(Ability, Chance),
     retractall(enemyskill(_)),
     toggle_turn,
