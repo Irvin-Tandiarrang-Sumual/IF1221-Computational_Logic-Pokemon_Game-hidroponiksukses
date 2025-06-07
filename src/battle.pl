@@ -22,7 +22,7 @@ random_between(Low, High, R) :-
 daftar_party :-
     findall(Index-Nama, party(Index, Nama), List),
     sort(List, Sorted),
-    write('Daftar Pokémon dalam party kamu:'), nl,
+    write('Daftar Pokemon dalam party kamu:'), nl,
     tampilkan_party(Sorted).
 
 has_alive_pokemon :-
@@ -83,8 +83,8 @@ buat_lawan(Rarity) :-
     remaining_moves(Remaining),
 
     % Hitung batas level berdasarkan remaining_moves
-    LevelMin is min(15, max(2, round(2 + (20 - Remaining) / 2))),
-    LevelMax is min(15, max(LevelMin, round(4 + (20 - Remaining) / 1.5))),
+    LevelMin is max(1, min(15, round(1 + (20 - Remaining) / 3.5))),
+    LevelMax is max(LevelMin, min(15, round(2 + (20 - Remaining) / 2.5))),
     random_between(LevelMin, LevelMax, Level),
     Level1 is Level - 1,
     base_stats(HPBase, ATKBase, DEFBase, Nama),
@@ -214,7 +214,8 @@ turn :-
     ; myTurn ->
         nl, handle_player_turn, nl
     ; handle_enemy_turn
-    ).
+    ),
+    toggle_turn.
 
 turn :-
     situation(Status),
@@ -276,11 +277,11 @@ defend :-
         assertz(defendStatus(DefMulKita, 1.3)),
         statusLawan(CurHP, _, _, _, Name, _, _),
         write(Name), write(' bertahan! DEF naik 30% untuk 1 turn.'), nl
-    ), toggle_turn,
+    ),
     turn.
 
 attack :-
-    damage_skill(1, neutral), toggle_turn,
+    damage_skill(1, neutral),
     turn.
 
 skill(SkillNumber) :-
@@ -296,7 +297,7 @@ skill(SkillNumber) :-
                 write('Skill 1 masih cooldown '), write(CD1), write(' turn.'), nl, fail
             ;
                 NamaSkill = Skill1,
-                NewCD1 = 2
+                NewCD1 = 1
             )
     ;
         SkillNumber =:= 2 ->
@@ -307,7 +308,7 @@ skill(SkillNumber) :-
                     write('Skill 2 masih cooldown '), write(CD2), write(' turn.'), nl, fail
                 ;
                     NamaSkill = Skill2,
-                    NewCD2 = 4
+                    NewCD2 = 2
                 )
             )
     ;
@@ -331,7 +332,6 @@ skill(SkillNumber) :-
         retract(cooldown_kita(CD1, _)),
         assertz(cooldown_kita(CD1, NewCD2))
     ), 
-    toggle_turn,
     turn.
 
 damage_skill(Power, Elmt) :-
@@ -499,29 +499,71 @@ apply_paralyze(ID) :-
     ; true ), !.
 apply_paralyze(_).  % fallback bila tidak ada efek paralyze
 
+% Menggabungkan tiga list manual, menggantikan append/2
+combine_actions([], [], L, L).
+combine_actions([], L2, L3, R) :- combine(L2, L3, R).
+combine_actions(L1, [], L3, R) :- combine(L1, L3, R).
+combine_actions(L1, L2, L3, R) :-
+    combine(L1, L2, T),
+    combine(T, L3, R).
+
+combine([], L, L).
+combine([H|T], L, [H|R]) :- combine(T, L, R).
+
 enemy_action :-
     statusLawan(_, _, _, _, NamaPokemon, Level, _),
     cooldown_lawan(CD1, CD2),
     pokeSkill(NamaPokemon, S1, S2),
-    findall(A,
-        ( member(A, [1,2,3,4]),
-          ( A = 3 -> CD1 =:= 0 ; A = 4 -> CD2 =:= 0, Level >= 5 ; true )),
-        Actions),
-    ( Actions == [] -> Action = 2 ; random_member(Action, Actions) ),
-    ( Action = 1 -> defend
-    ; Action = 2 -> attack
-    ; Action = 3 -> enemy_use_skill(S1), retract(cooldown_lawan(_, CD2)), assertz(cooldown_lawan(1, CD2))
-    ; Action = 4 -> enemy_use_skill(S2), retract(cooldown_lawan(CD1, _)), assertz(cooldown_lawan(CD1, 2))
+
+    % Kumpulkan aksi valid secara manual
+    (CD2 =:= 0, Level >= 5 -> A2 = [skill2] ; A2 = []),
+    (CD1 =:= 0 -> A1 = [skill1] ; A1 = []),
+    A3 = [attack, defend],
+
+    combine_actions(A1, A2, A3, ValidActions),
+
+    random_member(Chosen, ValidActions),
+    (
+        Chosen = skill2 ->
+            enemy_use_skill(S2),
+            retract(cooldown_lawan(CD1, _)),
+            assertz(cooldown_lawan(CD1, 2))
+    ;
+        Chosen = skill1 ->
+            enemy_use_skill(S1),
+            retract(cooldown_lawan(_, CD2)),
+            assertz(cooldown_lawan(1, CD2))
+    ;
+        Chosen = attack -> attack
+    ;
+        Chosen = defend -> defend
     ).
 
-enemy_use_skill(NamaSkill) :-
-    statusLawan(CurHP, _, _, _, Name, _, _),
-    skills(NamaSkill, AtkType, Power, Ability, Chance),
-    format('~w used ~w!~n', [Name, NamaSkill]),
+valid_enemy_action(CD1, CD2, Level, skill2) :-
+    CD2 =:= 0, Level >= 5.
+valid_enemy_action(CD1, _, _, skill1) :-
+    CD1 =:= 0.
+valid_enemy_action(_, _, _, attack).
+valid_enemy_action(_, _, _, defend).
+
+enemy_use_skill(Skill) :-
+    skills(Skill, AtkType, Power, Ability, Chance),
+    statusLawan(_, _, _, _, NamaPokemon, _, _),
+    format('~w used ~w!~n', [NamaPokemon, Skill]),
     damage_skill(Power, AtkType),
     apply_ability(Ability, Chance),
-    toggle_turn,
-    turn.
+    % Tambahkan pengaturan cooldown berdasarkan skill
+    pokeSkill(NamaPokemon, S1, S2),
+    ( Skill == S1 ->
+        cooldown_lawan(_, CD2),
+        retract(cooldown_lawan(_, _)),
+        assertz(cooldown_lawan(2, CD2))  % contoh cooldown skill 1 = 2
+    ; Skill == S2 ->
+        cooldown_lawan(CD1, _),
+        retract(cooldown_lawan(_, _)),
+        assertz(cooldown_lawan(CD1, 4))  % contoh cooldown skill 2 = 4
+    ; true ).
+
 
 ganti_pokemon_otomatis :-
     party(Index, _),              % Ambil index saat ini
