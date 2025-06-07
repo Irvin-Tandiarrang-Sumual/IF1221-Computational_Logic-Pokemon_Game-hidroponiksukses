@@ -78,10 +78,10 @@ move(_, _) :-
     fail.
 
 /* Player's movement */
-moveUp :- \+ situation(ongoing), write('Kamu bergerak ke atas'), nl, move(-2,0), check_player_pokemon.
-moveLeft :- \+ situation(ongoing), write('Kamu bergerak ke kiri'), nl, move(0,-2), check_player_pokemon.
-moveDown :- \+ situation(ongoing), write('Kamu bergerak ke bawah'), nl, move(2,0), check_player_pokemon.
-moveRight :- \+ situation(ongoing), write('Kamu bergerak ke kanan'), nl, move(0,2), check_player_pokemon.
+moveUp :- \+ situation(ongoing), write('Kamu bergerak ke atas'), nl, move(-2,0), check_player_pokemon,!.
+moveLeft :- \+ situation(ongoing), write('Kamu bergerak ke kiri'), nl, move(0,-2), check_player_pokemon,!.
+moveDown :- \+ situation(ongoing), write('Kamu bergerak ke bawah'), nl, move(2,0), check_player_pokemon,!.
+moveRight :- \+ situation(ongoing), write('Kamu bergerak ke kanan'), nl, move(0,2), check_player_pokemon,!.
 
 /* PokeCenter's interaction feature */
 

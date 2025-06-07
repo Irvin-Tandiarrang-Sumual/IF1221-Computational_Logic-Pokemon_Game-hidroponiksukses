@@ -63,7 +63,7 @@ status :-
     findall([N,X],party(N,X),ListInventory),
     /* Sorting by N (1-4) */
     sort(ListInventory,SortedList),
-    showStatusList(SortedList). 
+    showStatusList(SortedList),!. 
 
 showStatusList([]) :- !.
 /* Print status */
