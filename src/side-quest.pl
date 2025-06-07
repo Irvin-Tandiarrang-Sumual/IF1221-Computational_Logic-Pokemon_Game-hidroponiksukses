@@ -1,6 +1,6 @@
 quiz_pokemon(NamaPokemon) :-
     nl, nl,
-    write('Apa tipe element dari pokemon yang akan kamu lawan?'), nl,
+    write('Apa tipe element dari pokemon yang akan kamu lawan?'), nl, write('>> '),
     read(Answer), nl,
     type(X, NamaPokemon),
     ( X == Answer ->

@@ -101,7 +101,7 @@ step(10) :- starter_pokemon, initialize_inventory, init_map(17,32), init_bag(17,
 wait_enter :- nl, nl, write('press [ENTER] to continue'), get_char(_), nl.
 
 /* set_name: asking for name input */
-set_name:- red, nl, nl, write('|    First, what is your name?'), nl, read(X), nl, update_name(X), 
+set_name:- red, nl, nl, write('|    First, what is your name?'), nl, write('>> '), read(X), nl, update_name(X), 
     write('|    Right! So your name is '), print_name, write('!'), nl.
 
 /* starter_pokemon: asking to choose starter pokemon */
