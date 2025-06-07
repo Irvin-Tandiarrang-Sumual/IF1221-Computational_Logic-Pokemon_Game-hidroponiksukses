@@ -103,12 +103,16 @@ p_step(2) :-
 
 /* Interact with PokeCenter! */
 interactPcenter(heal):-
-    pcentervisit(X), X < 3,
+    pcentervisit(X), 
+    (X < 2 ->
     update_all_poke_hp_to_max,
     retractall(pcentervisit(_)),
     X1 is X + 1,
     assertz(pcentervisit(X1)),
-    write('|    Nurse Joy: Here you go dear, I have recovered all of your pokemon to full HP!'),nl,nl.
+    write('|    Nurse Joy: Here you go dear, I have recovered all of your pokemon to full HP!'),nl,nl
+    ;
+    write('|    Nurse Joy: I am very sorry! But you have reached the limit of your visit, do try again!'), nl, nl
+    ).
 
 interactPcenter(_):-
     write('|    Nurse Joy: Aww, alright then sweetie, have a great adventure!'),nl,nl.
