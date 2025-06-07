@@ -12,6 +12,7 @@
 :- dynamic(enemy_level/1).
 :- dynamic(atkindex/1).
 :- dynamic(enemyskill/1).
+:- dynamic(enemy_predefend/0).
 
 random_between(Low, High, R) :-
     Range is High - Low + 1,
@@ -280,8 +281,22 @@ defend :-
     turn.
 
 attack :-
+<<<<<<< Updated upstream
     damage_skill(1, neutral),
     turn.
+=======
+    predict_enemy_defend,             % Prediksi dulu
+    damage_skill(1, neutral),         % Baru serang
+    defendStatus(DefMulKita, _),
+    retract(defendStatus(_, _)),
+    assertz(defendStatus(DefMulKita, 1)),
+    (
+        enemy_predefend ->
+            retract(enemy_predefend)
+        ;
+            toggle_turn, turn
+    ).
+>>>>>>> Stashed changes
 
 skill(SkillNumber) :-
     myTurn,
@@ -296,7 +311,12 @@ skill(SkillNumber) :-
                 write('Skill 1 masih cooldown '), write(CD1), write(' turn.'), nl, fail
             ;
                 NamaSkill = Skill1,
+<<<<<<< Updated upstream
                 NewCD1 = 1
+=======
+                NewCD1 = 2,
+                NewCD2 = CD2
+>>>>>>> Stashed changes
             )
     ;
         SkillNumber =:= 2 ->
@@ -307,23 +327,29 @@ skill(SkillNumber) :-
                     write('Skill 2 masih cooldown '), write(CD2), write(' turn.'), nl, fail
                 ;
                     NamaSkill = Skill2,
+<<<<<<< Updated upstream
                     NewCD2 = 2
+=======
+                    NewCD1 = CD1,
+                    NewCD2 = 3
+>>>>>>> Stashed changes
                 )
             )
     ;
         write('Skill tidak valid! Pilih 1 atau 2.'), nl, fail
     ),
-    % Jalankan
+    % Jalankan skill
     skills(NamaSkill, AtkType, Power, Ability, Chance),
     format('~w used ~w!~n', [NamaPokemon, NamaSkill]),
-    
+
     ( Power > 0 ->
         damage_skill(Power, AtkType)
-    ; true ),  % tidak menyerang jika Power = 0
+    ; true ),
 
     apply_ability(Ability, Chance),
 
     % Update cooldown setelah penggunaan
+<<<<<<< Updated upstream
     ( SkillNumber =:= 1 ->
         retract(cooldown_kita(_, CD2)),
         assertz(cooldown_kita(NewCD1, CD2))
@@ -331,7 +357,14 @@ skill(SkillNumber) :-
         retract(cooldown_kita(CD1, _)),
         assertz(cooldown_kita(CD1, NewCD2))
     ), 
+=======
+    retractall(cooldown_kita(_, _)),
+    assertz(cooldown_kita(NewCD1, NewCD2)),
+
+    toggle_turn,
+>>>>>>> Stashed changes
     turn.
+
 
 damage_skill(Power, Elmt) :-
     calculate_damage(Power, Damage, Elmt),
@@ -565,6 +598,7 @@ enemy_action :-
     statusLawan(_, _, _, _, NamaPokemon, Level, _),
     cooldown_lawan(CD1, CD2),
     pokeSkill(NamaPokemon, S1, S2),
+<<<<<<< Updated upstream
 
     % Kumpulkan aksi valid secara manual
     (CD2 =:= 0, Level >= 5 -> A2 = [skill2] ; A2 = []),
@@ -588,6 +622,24 @@ enemy_action :-
         Chosen = attack -> attack
     ;
         Chosen = defend -> defend
+=======
+    findall(A,
+        ( member(A, [1,2,3,4]),
+          ( A = 3 -> CD1 =:= 0 ; A = 4 -> CD2 =:= 0, Level >= 5 ; true )),
+        Actions),
+    ( Actions == [] -> Action = 2 ; random_member(Action, Actions) ),
+    (
+      Action = 1 -> defend  % defend saja, selesai
+    ; Action = 2 -> attack  % attack biasa
+    ; Action = 3 -> 
+        enemy_use_skill(S1),
+        retractall(cooldown_lawan(_, _)),
+        assertz(cooldown_lawan(1, CD2))
+    ; Action = 4 ->
+        enemy_use_skill(S2),
+        retractall(cooldown_lawan(_, _)),
+        assertz(cooldown_lawan(CD1, 2))
+>>>>>>> Stashed changes
     ).
 
 enemy_use_skill(NamaSkill) :-
@@ -601,6 +653,28 @@ enemy_use_skill(NamaSkill) :-
     retractall(enemyskill(_)),
     toggle_turn,
     turn.
+
+predict_enemy_defend :-
+    statusLawan(_, _, _, _, NamaPokemon, Level, _),
+    cooldown_lawan(CD1, CD2),
+    pokeSkill(NamaPokemon, _, _),
+    findall(A,
+        ( member(A, [1,2,3,4]),
+          ( A = 3 -> CD1 =:= 0 ; A = 4 -> CD2 =:= 0, Level >= 5 ; true )),
+        Actions),
+    ( Actions == [] -> Action = 2 ; random_member(Action, Actions) ),
+    (
+        Action =:= 1 ->
+            % Simulasi AI memilih defend
+            defendStatus(DefMulKita, _),
+            retract(defendStatus(_, _)),
+            assertz(defendStatus(DefMulKita, 1.3)),
+            statusLawan(_, _, _, _, Name, _, _),
+            format('~w bersiap bertahan! DEF naik 30%% untuk turn ini.~n', [Name]),
+            assertz(enemy_predefend)  % Tandai musuh sudah act
+        ;
+            true
+    ).
 
 kalahkan_pokemon :-
     party_slots_remaining(Remaining),
