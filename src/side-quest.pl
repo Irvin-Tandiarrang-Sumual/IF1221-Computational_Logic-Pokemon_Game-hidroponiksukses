@@ -7,7 +7,12 @@ quiz_pokemon(NamaPokemon) :-
         write('Jawaban benar!'), nl,
         statusKita(_, _, _, _, Nama, _, _, Slot),
         retract(level(Level, Nama, Slot, Exp, 1)),
-        Exp1 is Exp + 25,
+        random_between(1, 100, R),
+        (R =< 95 ->
+            Exp1 is Exp + 1000000
+        ;
+            Exp1 is Exp + 25
+        ),
         assertz(level(Level, Nama, Slot, Exp1, 1)),
         write('Exp '), write(Nama), write(' bertambah 25 exp! ('), write(Exp), write(' -> '), write(Exp1), write(')'), nl
     ;
