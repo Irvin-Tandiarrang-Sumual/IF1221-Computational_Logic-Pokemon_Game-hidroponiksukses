@@ -132,7 +132,16 @@ battle(Rarity) :-
     retractall(situation(_)),
     assertz(situation(ongoing)),
 
-    buat_lawan(Rarity),
+    remaining_moves(SisaMove),
+    (
+        SisaMove =< 0 ->
+            /* pasti lawan mewtwo */
+            print_end_game_opening,
+            buat_lawan_mewtwo
+        ;
+            /* lawan normal */
+            buat_lawan(Rarity)
+    ),
 
     retractall(myTurn),
     assertz(myTurn),
@@ -197,7 +206,10 @@ turn :-
             ;
                 write('Semua Pokemonmu sudah kalah. Kamu kalah total...\n'),
                 retractall(situation(_)),
-                assertz(situation(lose))
+                assertz(situation(lose)),
+                remaining_moves(SisaMove),
+                (SisaMove =< 0 -> check_endgame ; true)
+
             )
     ; HP2 =< 0 ->
         format('Pokemon ~w kalah! Kamu menang!~n~n', [Name2]),
@@ -212,7 +224,12 @@ turn :-
                 ignore(addExp(Expgiven, Index1, Name))
             )
         ),
+        retractall(situation(_)),
+        assertz(situation(win)), 
+        remaining_moves(SisaMove),
+        (SisaMove =< 0 -> check_endgame ; true),
         retractall(situation(_))
+        
     ; myTurn ->
         nl, handle_player_turn, nl
     ; 
