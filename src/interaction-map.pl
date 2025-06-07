@@ -2,6 +2,9 @@
 :- dynamic(map/1).
 :- dynamic(last_player_tile/1).
 
+/* Dynamic untuk kunjungan pemain */
+:- dynamic(pcentervisit/1).
+
 /* User's messages interface */
 boundaries_message :-
     write('Oh no! You are at the boundaries. Try other options rather than your current one.'), nl.
@@ -100,7 +103,11 @@ p_step(2) :-
 
 /* Interact with PokeCenter! */
 interactPcenter(heal):-
+    pcentervisit(X), X < 3,
     update_all_poke_hp_to_max,
+    retractall(pcentervisit(_)),
+    X1 is X + 1,
+    assertz(pcentervisit(X1)),
     write('|    Nurse Joy: Here you go dear, I have recovered all of your pokemon to full HP!'),nl,nl.
 
 interactPcenter(_):-
