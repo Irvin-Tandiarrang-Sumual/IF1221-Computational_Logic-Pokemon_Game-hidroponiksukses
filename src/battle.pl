@@ -298,10 +298,6 @@ defend :-
     turn.
 
 attack :-
-<<<<<<< Updated upstream
-    damage_skill(1, neutral),
-    turn.
-=======
     predict_enemy_defend,             % Prediksi dulu
     damage_skill(1, neutral),         % Baru serang
     defendStatus(DefMulKita, _),
@@ -313,7 +309,6 @@ attack :-
         ;
             toggle_turn, turn
     ).
->>>>>>> Stashed changes
 
 skill(SkillNumber) :-
     myTurn,
@@ -328,12 +323,8 @@ skill(SkillNumber) :-
                 write('Skill 1 masih cooldown '), write(CD1), write(' turn.'), nl, fail
             ;
                 NamaSkill = Skill1,
-<<<<<<< Updated upstream
-                NewCD1 = 1
-=======
                 NewCD1 = 2,
                 NewCD2 = CD2
->>>>>>> Stashed changes
             )
     ;
         SkillNumber =:= 2 ->
@@ -344,12 +335,8 @@ skill(SkillNumber) :-
                     write('Skill 2 masih cooldown '), write(CD2), write(' turn.'), nl, fail
                 ;
                     NamaSkill = Skill2,
-<<<<<<< Updated upstream
-                    NewCD2 = 2
-=======
                     NewCD1 = CD1,
                     NewCD2 = 3
->>>>>>> Stashed changes
                 )
             )
     ;
@@ -366,20 +353,10 @@ skill(SkillNumber) :-
     apply_ability(Ability, Chance),
 
     % Update cooldown setelah penggunaan
-<<<<<<< Updated upstream
-    ( SkillNumber =:= 1 ->
-        retract(cooldown_kita(_, CD2)),
-        assertz(cooldown_kita(NewCD1, CD2))
-    ; SkillNumber =:= 2 ->
-        retract(cooldown_kita(CD1, _)),
-        assertz(cooldown_kita(CD1, NewCD2))
-    ), 
-=======
     retractall(cooldown_kita(_, _)),
     assertz(cooldown_kita(NewCD1, NewCD2)),
 
     toggle_turn,
->>>>>>> Stashed changes
     turn.
 
 
@@ -615,31 +592,6 @@ enemy_action :-
     statusLawan(_, _, _, _, NamaPokemon, Level, _),
     cooldown_lawan(CD1, CD2),
     pokeSkill(NamaPokemon, S1, S2),
-<<<<<<< Updated upstream
-
-    % Kumpulkan aksi valid secara manual
-    (CD2 =:= 0, Level >= 5 -> A2 = [skill2] ; A2 = []),
-    (CD1 =:= 0 -> A1 = [skill1] ; A1 = []),
-    A3 = [attack, defend],
-
-    combine_actions(A1, A2, A3, ValidActions),
-
-    random_member(Chosen, ValidActions),
-    (
-        Chosen = skill2 ->
-            enemy_use_skill(S2),
-            retract(cooldown_lawan(CD1, _)),
-            assertz(cooldown_lawan(CD1, 2))
-    ;
-        Chosen = skill1 ->
-            enemy_use_skill(S1),
-            retract(cooldown_lawan(_, CD2)),
-            assertz(cooldown_lawan(1, CD2))
-    ;
-        Chosen = attack -> attack
-    ;
-        Chosen = defend -> defend
-=======
     findall(A,
         ( member(A, [1,2,3,4]),
           ( A = 3 -> CD1 =:= 0 ; A = 4 -> CD2 =:= 0, Level >= 5 ; true )),
@@ -656,7 +608,6 @@ enemy_action :-
         enemy_use_skill(S2),
         retractall(cooldown_lawan(_, _)),
         assertz(cooldown_lawan(CD1, 2))
->>>>>>> Stashed changes
     ).
 
 enemy_use_skill(NamaSkill) :-
