@@ -27,7 +27,7 @@ start :-
         assertz(init),
         init_moves(20),
         assertz(player(ash, 0, 0, 0, 0, 0, 0)),
-        title, created_by, startgame(10)
+        title, created_by, startgame(0)
     ).
 
 exit :-
@@ -94,7 +94,7 @@ step(9) :- set_name, wait_enter.
 step(10) :- starter_pokemon, initialize_inventory, init_map(17,32).
 
 /* wait_enter: press ENTER to continue */
-wait_enter :- get_char(_), nl.
+wait_enter :- nl, nl, write('press [ENTER] to continue'), get_char(_), nl.
 
 /* set_name: asking for name input */
 set_name:- red, nl, nl, write('|    First, what is your name?'), nl, read(X), nl, update_name(X), 
