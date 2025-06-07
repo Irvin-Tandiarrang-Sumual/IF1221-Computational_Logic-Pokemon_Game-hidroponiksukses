@@ -7,4 +7,4 @@ help:-
     write('status       : See status of your party POKeMON'), nl, 
     write('showMap      : Visualize map'), nl,
     write('showBag      : Visualize bag'), nl,
-    write('setParty     : Mengatur pokemon pada party'), nl.
+    write('setParty     : Mengatur POKeMON pada party'), nl.

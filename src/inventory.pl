@@ -22,16 +22,16 @@ add_item(Item) :-
     ;   write('Inventori penuh! Tidak bisa menambahkan item.'), nl
     ).
 
-/* Menggunakan Poké Ball */
+/* Menggunakan Poke Ball */
 use_pokeball :-
     (   item_inventory(Index, pokeball(empty)) ->
         retract(item_inventory(Index, pokeball(empty))),
         assertz(item_inventory(Index, empty)),
-        write('Poké Ball digunakan.'), nl
+        write('Poke Ball digunakan.'), nl
     ;   write('Tidak ada Poke Ball kosong!'), nl
     ).
 
-/* Menangkap Pokémon */
+/* Menangkap Pokemon */
 catch_pokemon(Pokemon) :-
     party_slots_remaining(Remaining),
     remaining_moves(Remaining1),
@@ -57,7 +57,7 @@ catch_pokemon(Pokemon) :-
             assertz(level(Leve1, Pokemon, Index, 0, 0)), 
             assertz(item_inventory(Index, pokeball(filled(Pokemon)))),
             assertz(curr_health(Index,Pokemon,HP, 0)),
-            format('~w tertangkap dan disimpan di Poké Ball slot ~w~n', [Pokemon, Index])
+            format('~w tertangkap dan disimpan di Poke Ball slot ~w~n', [Pokemon, Index])
         ;   
             format('Tidak ada Poke Ball kosong! Gagal menangkap ~w~n', [Pokemon]), fail
         )
@@ -106,8 +106,7 @@ add_to_party(Index, Pokemon) :-
     length(List, Len),
     max_party_size(Max),
     (Len < Max ->
-        assertz(party(Index, Pokemon)),
-        write(Pokemon), write(' telah ditambahkan ke party.'), nl
+        assertz(party(Index, Pokemon))
     ;
         write('Party penuh!'), nl, fail
     ).

@@ -23,7 +23,7 @@ random_between(Low, High, R) :-
 daftar_party :-
     findall(Index-Nama, party(Index, Nama), List),
     sort(List, Sorted),
-    write('Daftar Pokemon dalam party kamu:'), nl,
+    write('Daftar POKeMON dalam party kamu:'), nl,
     tampilkan_party(Sorted).
 
 has_alive_pokemon :-
@@ -45,7 +45,7 @@ tampilkan_party([Index-Nama | T]) :-
 
 pilih_pokemon :-
     repeat,
-    write('Masukkan indeks Pokémon yang ingin kamu gunakan: '), nl,
+    write('Masukkan indeks POKeMON yang ingin kamu gunakan: '), nl,
     write('>> '),
     read(Index),
     (
@@ -53,10 +53,10 @@ pilih_pokemon :-
         party(Index, Name),
         curr_health(Index, Name, HP, 1),
         HP > 0 ->
-            format('Kamu memilih ~w sebagai Pokemon utama!~n', [Name]),
+            format('Kamu memilih ~w sebagai POKeMON utama!~n', [Name]),
             retractall(atkindex(_)), asserta(atkindex(Index)), init_poke(Index),!
         ;
-        write('Pilihan tidak valid atau Pokémon sudah tumbang, silakan pilih lagi.'), nl,
+        write('Pilihan tidak valid atau POKeMON sudah tumbang, silakan pilih lagi.'), nl,
         fail
     ).
 
@@ -105,7 +105,7 @@ buat_lawan(Rarity) :-
     write('HP: '), write(MaxHP), nl,
     write('ATK: '), write(ATK), nl,
     write('DEF: '), write(DEF), nl, nl,
-    write('Pilih Pokemon mu dari party!'), nl,
+    write('Pilih POKeMON mu dari party!'), nl,
     daftar_party,
     pilih_pokemon,
     retractall(defendStatus(_, _)),
@@ -195,7 +195,7 @@ turn :-
             curr_health(Index, Name1, 0, 1),
             retractall(statusEfekKita(_, _)),
             ( has_alive_pokemon ->
-                write('Pilih Pokémon pengganti:\n'),
+                write('Pilih POKeMON pengganti:\n'),
                 retract(statusKita(0, _, _, _, Name1, _, _, _)),
                 daftar_party,
                 pilih_pokemon,
@@ -204,7 +204,7 @@ turn :-
                 assertz(myTurn),
                 turn
             ;
-                write('Semua Pokemonmu sudah kalah. Kamu kalah total...\n'),
+                write('Semua POKeMON-mu sudah kalah. Kamu kalah total...\n'),
                 retractall(situation(_)),
                 assertz(situation(lose)),
                 retractall(statusKita(_,_,_,_,_,_,_,_)),
@@ -214,7 +214,7 @@ turn :-
 
             )
     ; HP2 =< 0 ->
-        format('Pokemon ~w kalah! Kamu menang!~n~n', [Name2]),
+        format('POKeMON ~w kalah! Kamu menang!~n~n', [Name2]),
         enemy_level(X),
         kalahkan_pokemon,
         forall(
@@ -302,17 +302,17 @@ defend :-
     turn.
 
 attack :-
-    ignore(predict_enemy_defend),             % Prediksi dulu
+    predict_enemy_defend,             % Prediksi dulu
     damage_skill(1, neutral),         % Baru serang
     defendStatus(DefMulKita, _),
     retract(defendStatus(_, _)),
     assertz(defendStatus(DefMulKita, 1)),
     (
         enemy_predefend ->
-            retract(enemy_predefend)
+            retractall(enemy_predefend)
         ;
-            toggle_turn, turn
-    ).
+            toggle_turn
+    ), turn.
 
 skill(SkillNumber) :-
     myTurn,
@@ -348,7 +348,7 @@ skill(SkillNumber) :-
     ),
     % Jalankan skill
     skills(NamaSkill, AtkType, Power, Ability, Chance),
-    ignore(predict_enemy_defend),
+    predict_enemy_defend,
     format('~w used ~w!~n', [NamaPokemon, NamaSkill]),
 
     ( Power > 0 ->
@@ -360,8 +360,15 @@ skill(SkillNumber) :-
     % Update cooldown setelah penggunaan
     retractall(cooldown_kita(_, _)),
     assertz(cooldown_kita(NewCD1, NewCD2)),
-
-    toggle_turn,
+    defendStatus(DefMulKita, _),
+    retract(defendStatus(_, _)),
+    assertz(defendStatus(DefMulKita, 1)),
+    (
+        enemy_predefend ->
+            retractall(enemy_predefend)
+        ;
+            toggle_turn
+    ),
     turn.
 
 
@@ -636,7 +643,7 @@ enemy_use_skill(NamaSkill) :-
     turn.
 
 predict_enemy_defend :-
-    statusLawan(_, _, _, _, NamaPokemon, Level, _),
+    statusLawan(_, _, _, _, NamaPokemon, _, _),
     enemy_level(Level),
     cooldown_lawan(CD1, CD2),
     pokeSkill(NamaPokemon, _, _),
@@ -676,7 +683,7 @@ kalahkan_pokemon :-
             assertz(level(Level, Pokemon, Index, 0, 0)), 
             assertz(item_inventory(Index, pokeball(filled(Pokemon)))),
             assertz(curr_health(Index,Pokemon,HP, 0)),
-            format('~w tertangkap dan disimpan di Poké Ball slot ~w~n', [Pokemon, Index])
+            format('~w tertangkap dan disimpan di Poke Ball slot ~w~n', [Pokemon, Index])
         ;   
             format('Tidak ada Poke Ball kosong! Gagal menangkap ~w~n', [Pokemon]), fail
         )

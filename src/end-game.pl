@@ -38,7 +38,7 @@ buat_lawan_mewtwo :-
     write('HP: '), write(MaxHP), nl,
     write('ATK: '), write(ATK), nl,
     write('DEF: '), write(DEF), nl, nl,
-    write('Pilih Pokemon mu dari party!'), nl,
+    write('Pilih POKeMON mu dari party!'), nl,
     daftar_party,
     pilih_pokemon,
     retractall(defendStatus(_, _)),
