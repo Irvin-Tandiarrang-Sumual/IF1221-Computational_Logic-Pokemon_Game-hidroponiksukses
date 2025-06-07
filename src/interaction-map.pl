@@ -29,23 +29,30 @@ check_valid_move(_, _, _) :-
     boundaries_message,
     fail.
 
+/* X row, Y column */
 move(DX, DY) :-
     /* Check whether the player's stil have moves left */
     remaining_moves(MovesLeft),
     MovesLeft > 0,
-    update_map,
 
     map(Matrix),
     findall((X,Y), (nth0(X, Matrix, Row), nth0(Y, Row, 'P')), [(OldX, OldY)]),
 
     NewX is OldX + DX,
     NewY is OldY + DY,
-    check_valid_move(Matrix, NewX, NewY),
+    check_valid_move(Matrix, NewX, NewY),!,
     nth0(NewX, Matrix, NewRow), nth0(NewY, NewRow, DestTile),
-    
     /* Update position */
     ( last_player_tile(TileToRestore) -> true ; TileToRestore = ' ' ),
-    replace_in_matrix(Matrix, (OldX, OldY), TileToRestore, TempMatrix),
+    ( pokemap(PokeList), member((Type, (OldX, OldY)), PokeList) -> 
+        replace_in_matrix(Matrix, (OldX, OldY), TileToRestore, TempMatrix) 
+        ; 
+    (TileToRestore = 'C' -> 
+        replace_in_matrix(Matrix, (OldX, OldY), ' ', TempMatrix)
+    ;   
+        replace_in_matrix(Matrix, (OldX, OldY), TileToRestore, TempMatrix))
+    ),
+    
     replace_in_matrix(TempMatrix, (NewX, NewY), 'P', NewMatrix),
     retractall(map(_)), assertz(map(NewMatrix)),
     retractall(last_player_tile(_)),
@@ -61,9 +68,6 @@ move(DX, DY) :-
     retract(remaining_moves(_)), assertz(remaining_moves(NewMovesLeft)),
     format("Moves left: ~d~n", [NewMovesLeft]),nl.
 
-update-map:-
-    ( pokemap(PokeList), member((Type, (OldX, OldY)), PokeList) -> true ; (last_player_tile(TileToRestore), TileToRestore = 'C' -> replace_positions(Matrix, (OldX,OldY), NewMatrix, ' '), retractall(map(Matrix)), assertz(map(NewMatrix)))).
-update_map:- true.  
 
 move(_, _) :-
     remaining_moves(0),
@@ -151,7 +155,7 @@ check_player_pokemon :-
         )
      ).
 
-handle_encounter_choice(1, Rarity, _) :-
+handle_encounter_choice(1, Rarity, Pos) :-
     write('Persiapkan dirimu!'), nl,
     write('Pertarungan yang epik baru saja dimulai!'), nl,
     battle(Rarity), remove_pokemon_from_map(Pos).
@@ -197,6 +201,7 @@ remove_pokemon_from_map(Pos) :-
     assertz(pokemap(NewList)).
 
 remove_pokes([], _, []).
-remove_pokes([(Name, Pos)|T], Pos, T) :- !.  
-remove_pokes([H|T], Pos, [H|Rest]) :-
-    remove_pokes(T, Pos, Rest).
+remove_pokes([(Name, P)|T], TargetPos, T) :-
+    P == TargetPos, !.
+remove_pokes([H|T], TargetPos, [H|Rest]) :-
+    remove_pokes(T, TargetPos, Rest).
