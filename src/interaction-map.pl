@@ -120,7 +120,8 @@ update_all_poke_hp_twenty:-
     forall(
         ( retract(curr_health(Index, Pokemon, HP, Party)),
           poke_stats(HP2, _, _, Pokemon, Index, Party),
-          HP1 is HP * 1.2
+          HP_Temp is HP + HP2 * 0.2,
+          HP1 is ceiling(HP_Temp)
         ),
         ( HP2 < HP1 -> assertz(curr_health(Index, Pokemon, HP2, Party)); assertz(curr_health(Index, Pokemon, HP1, Party)))
     ).
