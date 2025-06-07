@@ -226,7 +226,9 @@ turn :-
         retractall(situation(_)),
         assertz(situation(win)), 
         remaining_moves(SisaMove),
-        (SisaMove =< 0 -> check_endgame ; true)
+        (SisaMove =< 0 -> check_endgame ; true),
+        retractall(situation(_))
+        
     ; myTurn ->
         nl, handle_player_turn, nl
     ; 
