@@ -1,7 +1,6 @@
 :- dynamic(remaining_moves/1).
 :- dynamic(map/1).
 :- dynamic(last_player_tile/1).
-
 /* Dynamic untuk kunjungan pemain */
 :- dynamic(pcentervisit/1).
 

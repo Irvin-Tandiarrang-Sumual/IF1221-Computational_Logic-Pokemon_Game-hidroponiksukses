@@ -302,7 +302,7 @@ defend :-
     turn.
 
 attack :-
-    predict_enemy_defend,             % Prediksi dulu
+    ignore(predict_enemy_defend),             % Prediksi dulu
     damage_skill(1, neutral),         % Baru serang
     defendStatus(DefMulKita, _),
     retract(defendStatus(_, _)),
@@ -348,6 +348,7 @@ skill(SkillNumber) :-
     ),
     % Jalankan skill
     skills(NamaSkill, AtkType, Power, Ability, Chance),
+    ignore(predict_enemy_defend),
     format('~w used ~w!~n', [NamaPokemon, NamaSkill]),
 
     ( Power > 0 ->
@@ -466,23 +467,30 @@ apply_ability(lower_atk(N), _) :-
 apply_ability(paralyze, _) :-
     ( myTurn -> assertz(statusEfekLawan(paralyze)) ; atkindex(Index), assertz(statusEfekKita(Index, paralyze)) ),
     write('Efek paralysis diterapkan! Mungkin gagal menyerang.'), nl.
-apply_ability(heal(Ratio), _) :-
-    statusKita(CurHP, MaxHP, ATK, DEF, Nama, ID),
-    Heal is round(MaxHP * Ratio),
-    NewHP is min(MaxHP, CurHP + Heal),
-    retract(statusKita(CurHP, MaxHP, ATK, DEF, Nama, ID, Type, Index)),
-    assertz(statusKita(NewHP, MaxHP, ATK, DEF, Nama, ID, Type, Index)),
-    write(Nama), write(' memulihkan '), write(Heal), write(' HP!'), nl.
-apply_ability(sleep(Turns), _) :-
+
+apply_ability(heal(Ratio, Turns), _) :-
     ( myTurn ->
-        statusKita(_, _, _, _,Nama,_, _, Index),
-        assertz(statusEfekKita(Index, sleep(Turns)))
+        statusKita(CurHP, MaxHP, ATK, DEF, Nama, ID, Type, Index),
+        Heal is round(MaxHP * Ratio),
+        NewHP is min(MaxHP, CurHP + Heal),
+        retract(statusKita(CurHP, MaxHP, ATK, DEF, Nama, ID, Type, Index)),
+        assertz(statusKita(NewHP, MaxHP, ATK, DEF, Nama, ID, Type, Index)),
+        write(Nama), write(' memulihkan '), write(Heal), write(' HP!'), nl,
+        assertz(statusEfekKita(Index, sleep(Turns))),
+        write('Efek sleep diterapkan ke '), write(Nama),
+        write('! Akan tertidur selama '), write(Turns), write(' turn.'), nl
     ;   
-        statusLawan(_, _, _, _, Nama, _, _),
-        assertz(statusEfekLawan(sleep(Turns)))
-    ),
-    write('Efek sleep diterapkan ke '), write(Nama),
-    write('! Akan tertidur selama '), write(Turns), write(' turn.'), nl.
+        statusLawan(CurHP, MaxHP, ATK, DEF, Nama, ID, Type),
+        Heal is round(MaxHP * Ratio),
+        NewHP is min(MaxHP, CurHP + Heal),
+        retract(statusLawan(CurHP, MaxHP, ATK, DEF, Nama, ID, Type)),
+        assertz(statusLawan(NewHP, MaxHP, ATK, DEF, Nama, ID, Type)),
+        write(Nama), write(' memulihkan '), write(Heal), write(' HP!'), nl,
+        assertz(statusEfekLawan(sleep(Turns))),
+        write('Efek sleep diterapkan ke '), write(Nama),
+        write('! Akan tertidur selama '), write(Turns), write(' turn.'), nl
+    ).
+    
 
 apply_ability(area, _) :-
     enemyskill(NamaSkill),
@@ -593,7 +601,8 @@ combine([], L, L).
 combine([H|T], L, [H|R]) :- combine(T, L, R).
 
 enemy_action :-
-    statusLawan(_, _, _, _, NamaPokemon, Level, _),
+    statusLawan(_, _, _, _, NamaPokemon, _, _),
+    enemy_level(Level),
     cooldown_lawan(CD1, CD2),
     pokeSkill(NamaPokemon, S1, S2),
     findall(A,
@@ -628,6 +637,7 @@ enemy_use_skill(NamaSkill) :-
 
 predict_enemy_defend :-
     statusLawan(_, _, _, _, NamaPokemon, Level, _),
+    enemy_level(Level),
     cooldown_lawan(CD1, CD2),
     pokeSkill(NamaPokemon, _, _),
     findall(A,

@@ -1,7 +1,6 @@
 :- dynamic(base_stats/4).
 :- dynamic(poke_stats/6).
 :- dynamic(level/5).
-:- dynamic(skill/5).
 
 /* Pokemon */
 /* List pokemon */
@@ -98,7 +97,7 @@ skills(bubble, water, 30, lower_atk(3), 1.0).
 skills(thunder_shock, electric, 40, paralyze, 0.2).
 skills(quick_attack, normal, 30, none, 0).
 skills(rock_throw, rock, 50, none, 0).
-skills(rest, normal, 0, [heal(1.0), sleep(2)], 1.0).
+skills(rest, normal, 0, heal(1.0, 2), 1.0).
 skills(ice_shard, ice, 40, none, 0).
 skills(psychic_blast, psychic, 25, paralyze, 0.2).
 skills(mind_shock, psychic, 20, area, 1.0).

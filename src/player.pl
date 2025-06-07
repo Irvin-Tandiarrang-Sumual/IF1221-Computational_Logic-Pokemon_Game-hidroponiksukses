@@ -4,10 +4,6 @@
 :- dynamic(party/2).
 /* curr_health : (Indeks, Nama, CurrHP, Bool_party)*/
 :- dynamic(curr_health/4).
-/* TODO */
-:- dynamic(isSkillUsed_Self/2).
-/* TODO */
-:- dynamic(isHeal/1).
 
 /* Initiating to choose starter */
 chooseStarter:-  findall(NamaX,starter(_, NamaX),ListStarter),
@@ -33,13 +29,11 @@ starterToInventory(X, Y) :-
     base_stats(HP1, ATK1, DEF1, NamaX),
     asserta(poke_stats(HP1, ATK1, DEF1, NamaX, 1, 1)),
     assertz(curr_health(1, NamaX, HP1, 1)),
-    asserta(isSkillUsed_Self(1,0)),
     add_to_party(1, NamaX),
     /* Setting stats for choosen starter 2 (Y) */
     base_stats(HP2, ATK2, DEF2, NamaY),
     asserta(poke_stats(HP2, ATK2, DEF2, NamaY, 2, 1)),
     assertz(curr_health(2, NamaY, HP2, 1)),
-    asserta(isSkillUsed_Self(2,0)),
     add_to_party(2, NamaY),
     write(NamaX), write(' & '), write(NamaY), write(' is now your partner!'),nl, !.
 

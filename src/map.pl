@@ -185,7 +185,7 @@ replace_common_positions(Matrix, [(X,Y)|T], ResultMatrix) :-
 
 random_player_pos((X, Y)) :-
     map(Matrix),
-    findall((I, J), (nth0(I, Matrix, Row), nth0(J, Row, ' ')), ZeroTiles), random_membermap((X, Y), ZeroTiles),
+    findall((I, J), (nth0(I, Matrix, Row), nth0(J, Row, ' ')), ZeroTiles), random_member((X, Y), ZeroTiles),
     update_player(X,Y).
 
 place_random_p :-
@@ -200,7 +200,7 @@ replace_in_matrix(Matrix, (X, Y), Elem, NewMatrix):-
     replace_in_list(Y, Elem, Row, NewRow),
     replace_in_list(X, NewRow, Matrix, NewMatrix).
 
-random_membermap(X, List):-
+random_member(X, List):-
     length(List, Length),
     Length > 0,
     random(0, Length, Index),
@@ -209,7 +209,7 @@ random_membermap(X, List):-
 /* Additional Rules for PokeCenter */
 random_pokecenter_pos((X, Y)) :-
     map(Matrix),
-    findall((I, J), (nth0(I, Matrix, Row), nth0(J, Row, ' ')), ZeroTiles), random_membermap((X, Y), ZeroTiles).
+    findall((I, J), (nth0(I, Matrix, Row), nth0(J, Row, ' ')), ZeroTiles), random_member((X, Y), ZeroTiles).
 
 place_random_h :-
     random_pokecenter_pos((X, Y)),

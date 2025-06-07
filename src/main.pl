@@ -4,7 +4,6 @@
 /* player/7: (nama, pokemon 1, pokemon 2, pokemon 3, pokemon 4, X_pos, Y_pos) */
 :- dynamic(player/7).
 /* mengatur inisialisasi banyak putaran yang bisa dilakukan player */
-:- dynamic(init_moves/1).
 
 /* File lain */
 :- include('interaction-map.pl').
@@ -25,6 +24,7 @@ start :-
     ;
         init_starter, 
         assertz(init),
+        asserta(pcentervisit(0)),
         init_moves(20),
         assertz(player(ash, 0, 0, 0, 0, 0, 0)),
         title, created_by, startgame(0)
@@ -33,6 +33,15 @@ start :-
 exit :-
     ( current_predicate(init/0), init ->
         retractall(init),
+        resetall,
+        write('Game exited successfully.'), nl
+    ;
+        write('Game is not started.'), nl
+    ).
+
+resetall :-
+        retractall(init),
+        retractall(pcentervisit(_)),
         retractall(myTurn),
         retractall(situation(_)),
         retractall(statusKita(_,_,_,_,_,_,_,_)),
@@ -53,20 +62,12 @@ exit :-
         retractall(item_inventory(_,_)),
         retractall(init),
         retractall(player(_,_,_,_,_,_,_)),
-        retractall(init_moves(_)),
         retractall(pokemap(_)),
         retractall(party(_,_)),
         retractall(curr_health(_,_,_,_)),
-        retractall(isSkillUsed_Self(_,_)),
-        retractall(isHeal(_)),
-        retractall(base_stats(_,_,_,_)),
         retractall(poke_stats(_,_,_,_,_,_)),
         retractall(level(_,_,_,_,_)),
-        retractall(skill(_,_,_,_,_)),
-        write('Game exited successfully.'), nl
-    ;
-        write('Game is not started.'), nl
-    ).
+        retractall(skill(_,_,_,_,_)).
 
 /* update_name: input name and change the dynamic variable */
 update_name(NewName):- player(_, Poke1, Poke2, Poke3, Poke4, X_pos, Y_pos),
