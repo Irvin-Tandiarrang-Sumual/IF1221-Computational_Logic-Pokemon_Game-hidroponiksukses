@@ -482,6 +482,8 @@ apply_ability(heal(Ratio, Turns), _) :-
         NewHP is min(MaxHP, CurHP + Heal),
         retract(statusKita(CurHP, MaxHP, ATK, DEF, Nama, ID, Type, Index)),
         assertz(statusKita(NewHP, MaxHP, ATK, DEF, Nama, ID, Type, Index)),
+        retract(curr_health(Index, Nama, CurHP, 1)),
+        assertz(curr_health(Index, Nama, NewHP, 1)),
         write(Nama), write(' memulihkan '), write(Heal), write(' HP!'), nl,
         assertz(statusEfekKita(Index, sleep(Turns))),
         write('Efek sleep diterapkan ke '), write(Nama),
