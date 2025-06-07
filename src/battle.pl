@@ -299,7 +299,7 @@ defend :-
         statusLawan(CurHP, _, _, _, Name, _, _),
         write(Name), write(' bertahan! DEF naik 30% untuk 1 turn.'), nl
     ),
-    turn.
+    toggle_turn, turn.
 
 attack :-
     predict_enemy_defend,             % Prediksi dulu
@@ -618,7 +618,11 @@ enemy_action :-
         Actions),
     ( Actions == [] -> Action = 2 ; random_member(Action, Actions) ),
     (
-      Action = 1 -> defend  % defend saja, selesai
+      Action = 1 ->
+        (enemy_predefend ->
+            true
+        ;
+            defend )% defend saja, selesai
     ; Action = 2 -> attack  % attack biasa
     ; Action = 3 -> 
         enemy_use_skill(S1),

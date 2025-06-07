@@ -83,7 +83,7 @@ startgame(X) :-
     step(X),
     wait_enter,
     X1 is X + 1,
-    (X1 =< 10 -> startgame(X1); true).
+    (X1 =< 10 -> startgame(X1); help, showMap).
 
 /* step: sequences */
 step(0) :- nl.
