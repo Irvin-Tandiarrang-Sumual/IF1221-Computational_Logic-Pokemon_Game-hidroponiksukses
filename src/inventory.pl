@@ -117,7 +117,7 @@ party_slots_remaining(Remaining) :-
     max_party_size(Max),
     Remaining is Max - Len.
 
-invenswitch(Inven, Party):-
+setParty(Inven, Party):-
     Party1 is Party + 1,
     poke_stats(HPi, ATKi, DEFi, Pokemoni, Inven, 0),
     poke_stats(HPp, ATKp, DEFp, Pokemonp, Party1, 1),
