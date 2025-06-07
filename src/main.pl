@@ -61,7 +61,7 @@ exit :-
         retractall(base_stats(_,_,_,_)),
         retractall(poke_stats(_,_,_,_,_,_)),
         retractall(level(_,_,_,_,_)),
-        retractall(skill(_,_,_,_,_)).
+        retractall(skill(_,_,_,_,_)),
         write('Game exited successfully.'), nl
     ;
         write('Game is not started.'), nl
