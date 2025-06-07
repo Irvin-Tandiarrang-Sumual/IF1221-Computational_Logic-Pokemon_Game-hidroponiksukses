@@ -10,7 +10,7 @@
 :- dynamic(isHeal/1).
 
 /* Initiating to choose starter */
-chooseStarter:-  findall(NamaX,starter(X, NamaX),ListStarter),
+chooseStarter:-  findall(NamaX,starter(_, NamaX),ListStarter),
     retractall(curr_health(_, _, _, _)),
     writeList(ListStarter),
     repeat,
@@ -90,10 +90,26 @@ showStatusList([[No_invenH, XH]|T]) :-
 /* Procedure */
 levelUp(X, No_inven) :-
     party(No_inven, X),
-    pokemon(ID, X, Rarity), level(Lev,X, No_inven, Exp, _),
+    pokemon(_, X, Rarity), level(Lev,X, No_inven, Exp, _),
     rarity(Rarity, BaseEXP, _, _), !,
     Exp >= (BaseEXP*Lev), statsUp(Lev, X, No_inven, BaseEXP),
     addExp(0, No_inven, X).
+
+/* Evolve pokemon */
+evolve(No_inven) :-
+    retract(poke_stats(HP, ATK, DEF, X, No_inven, 1)),
+    retract(level(Lev, X, No_inven, Counter, 1)),
+    retract(curr_health(No_inven, X, CurrHp, 1)),
+    retract(party(No_inven, X)),
+    pokemon(ID, X, common),
+    IdNew is ID + 3,
+    pokemon(IdNew, NamaBaru, common),
+    assertz(poke_stats(HP, ATK, DEF, NamaBaru, No_inven, 1)),
+    assertz(level(Lev, NamaBaru, No_inven, Counter, 1)),
+    assertz(curr_health(No_inven, NamaBaru, CurrHp, 1)),
+    assertz(party(No_inven, NamaBaru)),
+    format('Selamat ~w telah berhasil evolve menjadi ~w!~n', [X, NamaBaru]).
+    
 
 /* Changing the level and stats, reduce CurrentEXP by EXPCap */
 statsUp(Lev, X, No_inven, BaseEXP):-
@@ -112,7 +128,8 @@ statsUp(Lev, X, No_inven, BaseEXP):-
     write('Your '),write(X),write(' has leveled up!'),nl,
     write('Health: '), write(HP1),nl,
     write('ATK: '), write(ATK1),nl,
-    write('DEF: '), write(DEF1),nl,!.
+    write('DEF: '), write(DEF1), nl,
+    ignore((NewLev >= 10 -> canevolve(X), evolve(No_inven); true)).
 
 addExp(X, Idx, Nama) :- 
     level(Lev,Nama,Idx, Exp, 1),

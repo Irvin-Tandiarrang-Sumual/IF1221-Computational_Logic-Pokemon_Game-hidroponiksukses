@@ -140,12 +140,12 @@ invenswitch(Inven, Party):-
 
     /* Ambil pokemon party */
     retract(poke_stats(HPp, ATKp, DEFp, Pokemonp, Party1, 1)),
-    retract(curr_health(Party1, Pokemomonp, CurrHpp, 1)),
+    retract(curr_health(Party1, Pokemonp, CurrHpp, 1)),
     retract(level(Levelp, Pokemonp, Party1, Counterp, 1)),
     retract(party(Party1,Pokemonp)),
 
     /* replace pokemon inven ke party */
-    assertz(poke_stats(HPi, ATKi, DEFpi, Pokemoni, Party1, 1)),
+    assertz(poke_stats(HPi, ATKi, DEFp, Pokemoni, Party1, 1)),
     assertz(curr_health(Party1, Pokemoni, CurrHpi, 1)),
     assertz(level(Leveli, Pokemoni, Party1, Counteri, 1)),
     assertz(party(Party1,Pokemoni)).

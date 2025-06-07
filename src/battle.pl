@@ -4,13 +4,14 @@
 :- dynamic(statusKita/8).
 :- dynamic(statusLawan/7).
 :- dynamic(defendStatus/2).
-:- dynamic(statusEfekKita/1).
+:- dynamic(statusEfekKita/2).
 :- dynamic(statusEfekLawan/1).
 :- dynamic(cooldown_kita/2).
 :- dynamic(cooldown_lawan/2).
 :- dynamic(player_level/1).
 :- dynamic(enemy_level/1).
 :- dynamic(atkindex/1).
+:- dynamic(enemyskill/1).
 
 random_between(Low, High, R) :-
     Range is High - Low + 1,
@@ -67,6 +68,7 @@ valid_pokemon_choice(Index) :-
 init_poke(Index) :-
     atkindex(Index),
     party(Index, Nama),
+    pokemon(ID, Nama, _),
     level(LevelKita,Nama,Index, _, 1),
     poke_stats(MaxHPKita, ATKKita, DEFKita, Nama, Index, 1),
     curr_health(Index, Nama, CurrHPKita, 1),
@@ -131,7 +133,6 @@ battle(Rarity) :-
 
     buat_lawan(Rarity),
 
-    base_stats(HPBase, ATKBase, DEFBase, PokemonKita),
     retractall(myTurn),
     assertz(myTurn),
 
@@ -153,9 +154,9 @@ battle(Rarity) :-
 get_status(HP, MaxHP, ATK, DEF, Nama, ID) :-
     ( myTurn ->
         atkindex(Index),
-        statusKita(CurrHPKita, MaxHPKita, ATKKita, DEFKita, Nama, ID, Type, Index)
+        statusKita(HP, MaxHP, ATK, DEF, Nama, ID, Type, Index)
     ; 
-        statusLawan(MaxHP, MaxHP, ATK, DEF, Nama, 99, Type)
+        statusLawan(HP, MaxHP, ATK, DEF, Nama, ID, Type)
     ).
 
 update_status(HP, MaxHP, ATK, DEF, Nama, ID) :-
@@ -174,8 +175,8 @@ ignore(_).
 turn :-
     situation(ongoing), !,
     atkindex(Index),
-    apply_turn_effects,
-    reset_defend,
+    ignore(apply_turn_effects),
+    ignore(reset_defend),
     statusKita(HP1, _, _, _, Name1, _, _, Index),
     statusLawan(HP2, _, _, _, Name2, _, _),
     (
@@ -183,7 +184,7 @@ turn :-
             format('~w tumbang!~n', [Name1]),
             party(Index, Name1),
             curr_health(Index, Name1, 0, 1),
-            retractall(statusEfekKita(_)),
+            retractall(statusEfekKita(_, _)),
             ( has_alive_pokemon ->
                 write('Pilih Pokémon pengganti:\n'),
                 retract(statusKita(0, _, _, _, Name1, _, _, _)),
@@ -199,23 +200,23 @@ turn :-
             )
     ; HP2 =< 0 ->
         format('Pokemon ~w kalah! Kamu menang!~n~n', [Name2]),
-        enemy_level(Level1),
+        enemy_level(X),
         kalahkan_pokemon,
         forall(
             (party(Index1, Name), curr_health(Index1, Name, HP, 1)),
             (
-                enemy_level(X), rarity(Rarity, _, Y, _), Expgiven is Y + X*2,
+                enemy_level(X), rarity(_, _, Y, _), Expgiven is Y + X*2,
                 retractall(curr_health(Index1, Name, _,1)),
                 assertz(curr_health(Index1, Name, HP, 1)),
                 ignore(addExp(Expgiven, Index1, Name))
             )
         ),
-        retractall(situation(_)), assertz(situation(win))
+        retractall(situation(_))
     ; myTurn ->
         nl, handle_player_turn, nl
-    ; handle_enemy_turn
-    ),
-    toggle_turn.
+    ; 
+        handle_enemy_turn
+    ).
 
 turn :-
     situation(Status),
@@ -228,15 +229,14 @@ find_next_alive_pokemon(CurrentIndex, NextIndex, PokemonName) :-
     HP > 0, !.  % ! agar ambil yang pertama ketemu
 
 handle_player_turn :-
-    statusEfekKita(sleep(T)), T > 0, !,
+    statusEfekKita(_, sleep(T)), T > 0, !,
     NewT is T - 1,
-    retract(statusEfekKita(sleep(T))),
-    (NewT > 0 -> assertz(statusEfekKita(sleep(NewT))) ; true),
+    retract(statusEfekKita(_, sleep(T))),
+    (NewT > 0 -> assertz(statusEfekKita(_, sleep(NewT))) ; true),
     statusKita(_, _, _, _, Name, _, _, _),
-    write(Name), write(' sedang tidur... turn dilewati.'), nl.
+    write(Name), write(' sedang tidur... turn dilewati.'), nl, nl, toggle_turn, turn.
 
 handle_player_turn :-
-    statusKita(CurHP, _, _, _, Name, _, _, _),
     write('Giliran kamu! Pilih aksi: attack. | defend. | skill(N).').
 
 handle_enemy_turn :-
@@ -245,10 +245,9 @@ handle_enemy_turn :-
     retract(statusEfekLawan(sleep(T))),
     (NewT > 0 -> assertz(statusEfekLawan(sleep(NewT))) ; true),
     statusLawan(_, _, _, _, Name, _, _),
-    write(Name), write(' sedang tidur... turn dilewati.'), nl.
+    write(Name), write(' sedang tidur... turn dilewati.'), nl, nl, toggle_turn, turn.
 
 handle_enemy_turn :-
-    statusLawan(CurHP, _, _, _, Name, _, _),
     situation(ongoing),  % penting: lanjut hanya jika battle belum selesai
     enemy_action.
 
@@ -347,7 +346,44 @@ damage_skill(Power, Elmt) :-
         assertz(statusKita(NewHP, MaxHP, ATK, DEF, Defender, ID, Type, Index)),
         retract(curr_health(Index, Defender, _, 1)), assertz(curr_health(Index, Defender, NewHP, 1))
     ),
-    format('Serangan memberikan ~w damage ke ~w. Sisa HP: ~w~n', [Damage, Defender, NewHP]).
+    format('Serangan memberikan ~w damage ke ~w. Sisa HP: ~w~n', [Damage, Defender, NewHP]), nl.
+
+damage_skill_all_exceptatkindex(Power, Elmt) :-
+    atkindex(AtkIndex),
+    ( integer(Power) -> P = Power ; P is round(Power) ),
+    statusLawan(_, _, ATK, _, _, _, _),
+    defendStatus(DefMul, _),
+    damage_loop(1, AtkIndex, P, Elmt, ATK, DefMul).
+
+damage_loop(5, _, _, _, _, _) :- !.  % selesai iterasi sampai 4
+damage_loop(I, AtkIndex, Power, Elmt, ATK, DefMul) :-
+    ( I =\= AtkIndex ->
+        (
+            ( party(I, Defender),
+              poke_stats(_, _, DEFD, Defender, I, 1),
+              curr_health(_, Defender, CurHP, 1),
+              type(Type, Defender),
+              (
+                  superEffective(Elmt, Type) -> Mult = 1.5,
+                      write('It is very effective...'), nl
+              ;   notEffective(Elmt, Type) -> Mult = 0.5,
+                      write('It is not very effective...'), nl
+              ;   Mult = 1
+              ),
+              Temp is float(DEFD) * float(DefMul),
+              TempRounded is round(Temp),
+              DEFAdj is max(1, TempRounded),
+              DamageFloat is Mult * Power * ATK / float(DEFAdj) / 5,
+              Damage is max(1, round(DamageFloat)),
+              retract(curr_health(I, Defender, CurHP, 1)),
+              NewHP is max(0, CurHP - Damage),
+              assertz(curr_health(I, Defender, NewHP, 1)),
+              format('Serangan memberikan ~w damage ke ~w. Sisa HP: ~w~n', [Damage, Defender, NewHP])
+            ) -> true ; true
+        )
+    ; true),
+    I1 is I + 1,
+    damage_loop(I1, AtkIndex, Power, Elmt, ATK, DefMul).
 
 calculate_damage(Power, Damage, Elmt) :-
     ( integer(Power) -> P = Power ; P is round(Power) ),
@@ -378,17 +414,9 @@ calculate_damage(Power, Damage, Elmt) :-
 
 apply_ability(none, _) :- !.
 apply_ability(_, Chance) :- random(X), X > Chance, !.
-apply_ability(Efek, _) :-
-    ( myTurn -> do_effect(statusEfekLawan, Efek)
-    ; do_effect(statusEfekKita, Efek)
-    ).
-
-do_effect(StatusEfek, burn(T, D)) :-
-    Term =.. [StatusEfek, burn(T, D)],
-    assertz(Term),
+apply_ability(burn(T, D), _) :-
+    ( myTurn -> assertz(statusEfekLawan(burn(T, D))) ; atkindex(Index), assertz(statusEfekKita(Index, burn(T, D))) ),
     write('Efek burn diterapkan!'), nl.
-
-
 apply_ability(lower_atk(N), _) :-
     ( myTurn ->
         statusLawan(HP, MaxHP, ATK, DEF, Nama, ID, Type),
@@ -397,19 +425,18 @@ apply_ability(lower_atk(N), _) :-
         assertz(statusLawan(HP, MaxHP, NewATK, DEF, Nama, ID, Type)),
         write(Nama), write(' ATK berkurang sebanyak '), write(N), nl
     ;
-        atkindex(Index),
         statusKita(HP, MaxHP, ATK, DEF, Nama, ID, Type, Index),
         NewATK is max(1, ATK - N),
         retract(statusKita(HP, MaxHP, ATK, DEF, Nama, ID, Type, Index)),
         assertz(statusKita(HP, MaxHP, NewATK, DEF, Nama, ID, Type, Index)),
         write(Nama), write(' ATK berkurang sebanyak '), write(N), nl
     ).
+    
 apply_ability(paralyze, _) :-
-    ( myTurn -> assertz(statusEfekLawan(paralyze)) ; assertz(statusEfekKita(paralyze)) ),
+    ( myTurn -> assertz(statusEfekLawan(paralyze)) ; atkindex(Index), assertz(statusEfekKita(Index, paralyze)) ),
     write('Efek paralysis diterapkan! Mungkin gagal menyerang.'), nl.
 apply_ability(heal(Ratio), _) :-
-    atkindex(Index),
-    statusKita(CurHP, MaxHP, ATK, DEF, Nama, ID, Type, Index),
+    statusKita(CurHP, MaxHP, ATK, DEF, Nama, ID),
     Heal is round(MaxHP * Ratio),
     NewHP is min(MaxHP, CurHP + Heal),
     retract(statusKita(CurHP, MaxHP, ATK, DEF, Nama, ID, Type, Index)),
@@ -417,20 +444,19 @@ apply_ability(heal(Ratio), _) :-
     write(Nama), write(' memulihkan '), write(Heal), write(' HP!'), nl.
 apply_ability(sleep(Turns), _) :-
     ( myTurn ->
-        assertz(statusEfekLawan(sleep(Turns))),
-        statusLawan(_,_,_,_,Nama,_, _)
-    ;
-        assertz(statusEfekKita(sleep(Turns))),
-        statusKita(_,_,_,_,Nama,_, _, _)
+        statusKita(_, _, _, _,Nama,_, _, Index),
+        assertz(statusEfekKita(Index, sleep(Turns)))
+    ;   
+        statusLawan(_, _, _, _, Nama, _, _),
+        assertz(statusEfekLawan(sleep(Turns)))
     ),
     write('Efek sleep diterapkan ke '), write(Nama),
     write('! Akan tertidur selama '), write(Turns), write(' turn.'), nl.
 
-% ----------------------
-% Fakta Dinamis
-% ----------------------
-:- dynamic(status_pokemon/6).
-:- dynamic(efek_pokemon/2).
+apply_ability(area, _) :-
+    enemyskill(NamaSkill),
+    skills(NamaSkill, AtkType, Power, _, _),
+    damage_skill_all_exceptatkindex(Power, AtkType).
 
 % ----------------------
 % Efek Turn
@@ -439,33 +465,25 @@ apply_ability(sleep(Turns), _) :-
 apply_turn_effects :-
     reduce_cooldown,
     ( myTurn ->
-        apply_status_effects(statusEfekKita, statusKita)
+        statusLawan(_, _, _, _, _, ID, _),
+        apply_burn(ID),
+        apply_paralyze(ID)
     ;
-        apply_status_effects(statusEfekLawan, statusLawan)
+        statusKita(_, _, _, _, _, ID, _, _),
+        apply_burn(ID),
+        apply_paralyze(ID)
     ).
-
-apply_status_effects(StatusEfek, Status) :-
-    ( call(StatusEfek, burn(T, D)) ->
-        get_status(HP, MaxHP, ATK, DEF, Nama, ID),
-        NewHP is max(0, HP - D),
-        update_status(NewHP, MaxHP, ATK, DEF, Nama, ID),
-        NewT is T - 1,
-        retract(call(StatusEfek, burn(T, D))),
-        (NewT > 0 -> assertz(call(StatusEfek, burn(NewT, D))) ; true),
-        format('~w terkena burn dan kehilangan ~w HP!~n', [Nama, D])
-    ; true ),
-    ( call(StatusEfek, paralyze) ->
-        random(X), X < 0.3 -> write('Efek paralysis aktif! Tidak bisa menyerang kali ini.'), nl, fail
-    ; true ).
 
 reduce_cooldown :-
     ( myTurn ->
+        \+ statusEfekKita(_, sleep(_)),
         cooldown_kita(CD1, CD2),
         NewCD1 is max(0, CD1 - 1),
         NewCD2 is max(0, CD2 - 1),
         retract(cooldown_kita(_, _)),
         assertz(cooldown_kita(NewCD1, NewCD2))
     ;
+        \+ statusEfekLawan(sleep(_)),
         cooldown_lawan(CD1, CD2),
         NewCD1 is max(0, CD1 - 1),
         NewCD2 is max(0, CD2 - 1),
@@ -475,28 +493,61 @@ reduce_cooldown :-
 
 % Burn Effect
 apply_burn(ID) :-
-    \+ immune_status(ID), 
-    efek_pokemon(ID, burn(T, D)),
-    status_pokemon(ID, CurHP, MaxHP, ATK, DEF, Nama),
-    NewHP is max(0, CurHP - D),
-    retract(status_pokemon(ID, CurHP, MaxHP, ATK, DEF, Nama)),
-    assertz(status_pokemon(ID, NewHP, MaxHP, ATK, DEF, Nama)),
-    NewT is T - 1,
-    retract(efek_pokemon(ID, burn(T, D))),
-    (NewT > 0 -> assertz(efek_pokemon(ID, burn(NewT, D))) ; true),
-    write(Nama), write(' terkena burn! -'), write(D), write(' HP'), nl.
+    ( myTurn ->
+        situation(ongoing),
+        \+ immune_status(ID),
+        \+ statusEfekLawan(burn(0, 3)),
+        statusEfekLawan(burn(T, D)),
+        statusLawan(CurHP, MaxHP, ATK, DEF, Nama, 99, Type),
+        NewHP is max(0, CurHP - D),
+        retract(statusLawan(CurHP, MaxHP, ATK, DEF, Nama, 99, Type)),
+        assertz(statusLawan(NewHP, MaxHP, ATK, DEF, Nama, 99, Type)),
+        NewT is T - 1,
+        retract(statusEfekLawan(burn(T, D))),
+        (NewT > 0 -> assertz(statusEfekLawan(burn(NewT, D))) ; true),
+        write(Nama), write(' terkena burn! -'), write(D), write(' HP'),
+        format('. Sisa HP: ~w~n', [NewHP]), nl, nl
+    ;
+        situation(ongoing),
+        \+ immune_status(ID), atkindex(Index), 
+        \+ statusEfekKita(Index, burn(0, D)),
+        statusEfekKita(Index, burn(T, D)),
+        statusKita(CurHP, MaxHPKita, ATKKita, DEFKita, Nama, ID, Type, Index),
+        NewHP is max(0, CurHP - D),
+        retract(statusKita(CurHP, MaxHPKita, ATKKita, DEFKita, Nama, ID, Type, Index)),
+        assertz(statusKita(CurHP, MaxHPKita, ATKKita, DEFKita, Nama, ID, Type, Index)),
+        NewT is T - 1,
+        retract(statusEfekKita(Index, burn(T, D))),
+        (NewT > 0 -> assertz(statusEfekKita(Index, burn(NewT, D))) ; true),
+        write(Nama), write(' terkena burn! -'), write(D), write(' HP'), 
+        format('. Sisa HP: ~w~n', [NewHP]), nl, nl
+    ).
+    
 apply_burn(_) :- true.  % fallback bila tidak ada efek burn
 
 % Paralyze Effect
 apply_paralyze(ID) :-
-    \+ immune_status(ID), 
-    efek_pokemon(ID, paralyze),
-    random_float(X),
-    ( X < 0.2 ->
-        status_pokemon(ID, _, _, _, _, Nama),
-        write(Nama), write(' terserang paralysis! Tidak bisa menyerang.'), nl,
-        fail  % menghentikan aksi berikutnya (misal: menyerang)
-    ; true ), !.
+( myTurn ->
+        situation(ongoing),
+        \+ immune_status(ID), atkindex(Index), 
+        statusEfekKita(Index, paralyze),
+        statusKita(_, _, _, _, Nama, ID, _, Index),
+        random_between(1, 10, X),
+        ( X < 2 ->
+        write(Nama), write(' terserang paralysis! Tidak bisa menyerang.'), nl, retractall(statusEfekKita(Index, paralyze)),
+        toggle_turn  % menghentikan aksi berikutnya (misal: menyerang)
+            ; true )
+    ;
+        situation(ongoing),
+        \+ immune_status(ID),
+        statusEfekLawan(paralyze),
+        statusLawan(_, _, _, _, Nama, 99, _),
+        random_between(1, 10, X),
+        ( X < 2 ->
+        write(Nama), write(' terserang paralysis! Tidak bisa menyerang.'), nl, retractall(statusEfekLawan(paralyze)),
+        toggle_turn  % menghentikan aksi berikutnya (misal: menyerang)
+    ; true )
+    ), !.
 apply_paralyze(_).  % fallback bila tidak ada efek paralyze
 
 % Menggabungkan tiga list manual, menggantikan append/2
@@ -539,51 +590,17 @@ enemy_action :-
         Chosen = defend -> defend
     ).
 
-valid_enemy_action(CD1, CD2, Level, skill2) :-
-    CD2 =:= 0, Level >= 5.
-valid_enemy_action(CD1, _, _, skill1) :-
-    CD1 =:= 0.
-valid_enemy_action(_, _, _, attack).
-valid_enemy_action(_, _, _, defend).
-
-enemy_use_skill(Skill) :-
-    skills(Skill, AtkType, Power, Ability, Chance),
-    statusLawan(_, _, _, _, NamaPokemon, _, _),
-    format('~w used ~w!~n', [NamaPokemon, Skill]),
+enemy_use_skill(NamaSkill) :-
+    retractall(enemyskill(_)),
+    statusLawan(_, _, _, _, Name, _, _),
+    skills(NamaSkill, AtkType, Power, Ability, Chance),
+    assertz(enemyskill(NamaSkill)),
+    format('~w used ~w!~n', [Name, NamaSkill]),
     damage_skill(Power, AtkType),
     apply_ability(Ability, Chance),
-    % Tambahkan pengaturan cooldown berdasarkan skill
-    pokeSkill(NamaPokemon, S1, S2),
-    ( Skill == S1 ->
-        cooldown_lawan(_, CD2),
-        retract(cooldown_lawan(_, _)),
-        assertz(cooldown_lawan(2, CD2))  % contoh cooldown skill 1 = 2
-    ; Skill == S2 ->
-        cooldown_lawan(CD1, _),
-        retract(cooldown_lawan(_, _)),
-        assertz(cooldown_lawan(CD1, 4))  % contoh cooldown skill 2 = 4
-    ; true ).
-
-
-ganti_pokemon_otomatis :-
-    party(Index, _),              % Ambil index saat ini
-    NextIndex is Index + 1,
-    ( party(NextIndex, NextPokemon) ->
-        player(_, _, _, _, _, _, LevelKita),
-        base_stats(HPBase, ATKBase, DEFBase, NextPokemon),
-        MaxHP is HPBase + 2 * LevelKita,
-        ATK is ATKBase + 1 * LevelKita,
-        DEF is DEFBase + 1 * LevelKita,
-        retractall(statusKita(_,_,_,_,_,_)),
-        assertz(statusKita(MaxHP, MaxHP, ATK, DEF, NextPokemon, 1)),
-        retractall(party(_, _)),  % Reset index
-        assertz(party(NextIndex, NextPokemon)),
-        format("~n~w masuk ke arena!~n", [NextPokemon]),
-        turn
-    ;   write('Semua Pokemonmu sudah kalah. Kamu kalah total...\n'),
-        retractall(situation(_)),
-        assertz(situation(kalah))
-    ).
+    retractall(enemyskill(_)),
+    toggle_turn,
+    turn.
 
 kalahkan_pokemon :-
     party_slots_remaining(Remaining),
@@ -600,7 +617,7 @@ kalahkan_pokemon :-
         (   item_inventory(Index, pokeball(empty)) ->
             retract(item_inventory(Index, pokeball(empty))),
             assertz(poke_stats(HP, ATK, DEF, Pokemon, Index, 0)),
-            assertz(level(Level1, Pokemon, Index, 0, 0)), 
+            assertz(level(Level, Pokemon, Index, 0, 0)), 
             assertz(item_inventory(Index, pokeball(filled(Pokemon)))),
             assertz(curr_health(Index,Pokemon,HP, 0)),
             format('~w tertangkap dan disimpan di Poké Ball slot ~w~n', [Pokemon, Index])

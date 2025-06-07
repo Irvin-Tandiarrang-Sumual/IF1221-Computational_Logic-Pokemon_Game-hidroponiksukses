@@ -221,7 +221,7 @@ place_random_h :-
 /* Additional Information for Player and PokeCenter */
 print_info_p :-
     map(Matrix),
-    player(A, B, C, D, E, PX, PY),
+    player(_, _, _, _, _, PX, PY),
     findall((I,J), (nth0(I, Matrix, Row), nth0(J, Row, Tile), Tile = 'H'), PcenterPositions),
     format("Player at (~d,~d)~n", [PX,PY]),
     forall(member((HX,HY), PcenterPositions), format("PokeCenter at (~d,~d)~n", [HX,HY])).
