@@ -1,19 +1,21 @@
-:- dynamic(final_mode/1).
 :- dynamic(mewtwo_defeated/0).
-
-/* cek udh end game atau belum */
-final_mode(false).
 
 /* Pembuka cerita di final stage */
 print_end_game_opening :-
     nl,
-    write('========================================'), nl,
-    write('         FINAL STAGE - LAST BATTLE       '), nl,
-    write('========================================'), nl,
-    write('Selamat datang di final stage!!'), nl,
-    write('Persiapkan dirimu!'), nl,
-    write('Kamu akan melawan...'), nl,
-    write('THE MIGHTY MEWTWO!!!'), nl, nl.
+    write('The air crackles with psychic energy...'), nl,
+    write('A powerful presence approaches!'), nl, nl,
+    write('Suddenly, a vortex of dark energy swirls before you,'), nl,
+    write('and from it emerges...'), nl, nl,
+    pokemon_ascii(10),
+    nl, nl, nl,
+    write('=========================================================='), nl,
+    write('                |||    FINAL BATTLE    |||                '), nl,
+    write('=========================================================='), nl, nl,
+    write('I see now that the circumstances of one`s birth are irrelevant.'), nl,
+    write('It is what you do with the gift of life that determines who you are.'), nl,
+    write('My powers are far beyond yours!'), nl,
+    write('The ultimate life-form... MEWTWO!'), nl, nl.
 
 /* buat mewtwo */
 buat_lawan_mewtwo :-
@@ -29,8 +31,8 @@ buat_lawan_mewtwo :-
     assertz(statusLawan(MaxHP, MaxHP, ATK, DEF, Nama, 99, Type)),
     retractall(enemy_level(_)),
     assertz(enemy_level(Level)),
-    pokemon(ID, Nama, _),
-    pokemon_ascii(ID),
+    /* pokemon(ID, Nama, _), */
+    /* pokemon_ascii(ID), */
     write('Kamu melawan '), write(Nama), write('.'), nl,
     write('Level: '), write(Level), nl,
     write('HP: '), write(MaxHP), nl,
@@ -43,55 +45,34 @@ buat_lawan_mewtwo :-
     assertz(defendStatus(1, 1)),
     true.
 
-/* Final battle */
-start_final_battle :-
-    \+ final_mode(true),
-    print_end_game_opening,
-    retractall(situation(_)),
-    assertz(situation(ongoing)),
-    final_battle, 
-    retractall(final_mode(_)),
-    assertz(final_mode(true)),
-    quiz_pokemon(mewtwo),
-    turn.
-
-/* Battle endgame */
-final_battle :-
-    buat_lawan_mewtwo,
-    player_level(LevelKita),
-    base_stats(HPBase, ATKBase, DEFBase, pikachu),
-    MaxHPKita is HPBase + 2 * LevelKita,
-    ATKKita is ATKBase + 1 * LevelKita,
-    DEFKita is DEFBase + 1 * LevelKita,
-    retractall(statusKita(_,_,_,_,_,_)),
-    assertz(statusKita(MaxHPKita, MaxHPKita, ATKKita, DEFKita, pikachu, 1)),
-    retractall(myTurn),
-    assertz(myTurn),
-    retractall(cooldown_kita(_, _)),
-    retractall(cooldown_lawan(_, _)),
-    assertz(cooldown_kita(0, 0)),
-    assertz(cooldown_lawan(0, 0)),
-    true.
-
 /* check keadaan end game */
 check_endgame :-
-    situation(win), !,
-    print_win_message;
-    situation(lose), !,
-    print_lose_message,
-    situation(ongoing), !,
-    write('Pertarungan masih berlanjut . . .'), nl.
+    ( situation(win) -> print_win_message
+    ; situation(lose) -> print_lose_message
+    ; true
+    ).
+
 
 /* print pesan kekalahan */
 print_lose_message :-
     nl,
-    write('☠☠☠ GAME OVER ☠☠☠'), nl,
-    write('KAMU KALAH HAHAHAHAHAHAHA'), nl,
-    write('Silahkan mulai dari awal'), nl.
+    write('========================================================'), nl,
+    write('                    YOU HAVE FALLEN...                  '), nl,
+    write('========================================================'), nl, nl,
+    write('... to the mighty MEWTWO!'), nl,
+    write('Your journey ends here, brave trainer.'), nl, nl,
+    write('Return stronger. A true Master never gives up!'), nl.
 
 /* print pesan kemenangan */
 print_win_message :-
     nl,
-    write('🏆🏆🏆 SELAMAT! 🏆🏆🏆'), nl,
-    write('Kamu telah mengalahkan semua lawan dan menjadi Juara Pokemon sejati!'), nl,
-    write('Sampai jumpa di petualangan lainnya!'), nl.
+    write('========================================================'), nl,
+    write('                CONGRATULATIONS, CHAMPION!              '), nl,
+    write('========================================================'), nl, nl,
+    write('MEWTWO slowly rises, a newfound respect in its eyes:'), nl,
+    write('"I have never encountered a trainer with such strength'), nl,
+    write('and bond with their POKeMON. You have proven yourself'), nl,
+    write('worthy. The world is safe in your hands."'), nl, nl,
+    write('You have defeated the legendary MEWTWO and proven yourself'), nl,
+    write('as the true POKeMON Master of this region!'), nl, nl,
+    write('Until we meet again in your next adventure...'), nl, nl.
