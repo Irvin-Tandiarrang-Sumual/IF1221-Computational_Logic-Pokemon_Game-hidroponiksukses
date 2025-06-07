@@ -149,3 +149,81 @@ invenswitch(Inven, Party):-
     assertz(curr_health(Party1, Pokemoni, CurrHpi, 1)),
     assertz(level(Leveli, Pokemoni, Party1, Counteri, 1)),
     assertz(party(Party1,Pokemoni)).
+
+:- dynamic(inv/1).
+:- dynamic(hw/2).
+
+/* Initiating inv and poke inv */
+init_bag(Width, Height) :- generate_bag(Width, Height), assertz(hw(Width,Height)).
+
+/* showBag: Print inv to console */
+showBag :-
+    inv(Bag),!,
+    nl,nl, write('=========================== My Inventory ============================'),nl,nl,
+    print_bag_rows(Bag, 0).
+
+print_bag_rows([], _).
+print_bag_rows([Row|T], I) :-
+    print_row_b(Row, I, 0),
+    nl,
+    I1 is I + 1,
+    print_bag_rows(T, I1).
+
+print_row_b([], _, _).
+print_row_b([H|T], RowIdx, ColIdx) :-
+    write(H), write(' '),
+    C1 is ColIdx + 1,
+    print_row_b(T, RowIdx, C1).
+
+generate_bag(Width, Height) :-
+    retractall(inv(_)),
+    generate_row_bs_b(1, Height, Width, Bag),
+    assertz(inv(Bag)).
+
+/* generate_row_bs_b: Create row */
+generate_row_bs_b(I, Height, Width, []) :- I > Height.
+generate_row_bs_b(I, Height, Width, [Row|T]) :-
+    I =< Height,
+    generate_row_b(I, Width, Row),
+    I1 is I + 1,
+    generate_row_bs_b(I1, Height, Width, T).
+
+/* generate_row_b: Create column per Row */
+generate_row_b(RowIndex, Size, Row) :-
+    Size1 is Size / 2,
+    Size2 is ceiling(Size1),
+    ( 0 is RowIndex mod 2 ->
+        line_b(Size, Row)      % even rows → lines
+    ;   tile_b(Size2, RowIndex, Row)  % odd rows → items
+    ).
+
+
+line_b(0, []).
+line_b(N, ['+'|T]) :-
+    N > 0,
+    N1 is N - 1,
+    line_b_zero_b(N1, T).
+
+line_b_zero_b(0, []).
+line_b_zero_b(N, ['--------------'|T]) :-
+    N > 0,
+    N1 is N - 1,
+    line_b(N1, T).
+
+tile_b(0, _, []).
+tile_b(N, RowIdx, ['|'|T]) :-
+    N > 0,
+    N1 is N - 1,
+    tile_b_zero(N1, RowIdx, 0, T).
+    
+tile_b_zero(0, _, _, []).
+tile_b_zero(N, RowIdx, ColIdx, [Item|T]) :-
+    columns(Columns),  
+    Index is ((RowIdx-1)//2) * Columns + ((ColIdx-1)//2),
+    ( item_inventory(Index, Item) -> true ; Item = empty),
+    Col1 is ColIdx + 1,
+    N1 is N - 1,
+    tile_b_zero(N1, RowIdx, Col1, T).
+
+
+columns(8). /* Assume always 8 * 5 just like in the specs :p */
