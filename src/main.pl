@@ -105,5 +105,5 @@ set_name:- red, nl, nl, write('|    First, what is your name?'), nl, write('>> '
     write('|    Right! So your name is '), print_name, write('!'), nl.
 
 /* starter_pokemon: asking to choose starter pokemon */
-starter_pokemon:- write('|    Choose your starter POKeMON. '), print_name, write('!'), nl, chooseStarter.
+starter_pokemon:- write('|    Choose your starter POKeMON. '), print_name, write('!'), nl, chooseStarter,!.
 
