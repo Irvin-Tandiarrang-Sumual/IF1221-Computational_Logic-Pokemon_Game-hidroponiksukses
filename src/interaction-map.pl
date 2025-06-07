@@ -40,7 +40,7 @@ move(DX, DY) :-
 
     NewX is OldX + DX,
     NewY is OldY + DY,
-    check_valid_move(Matrix, NewX, NewY),!,
+    check_valid_move(Matrix, NewX, NewY),
     nth0(NewX, Matrix, NewRow), nth0(NewY, NewRow, DestTile),
     /* Update position */
     ( last_player_tile(TileToRestore) -> true ; TileToRestore = ' ' ),
@@ -71,7 +71,7 @@ move(DX, DY) :-
 
 move(_, _) :-
     remaining_moves(0),
-    write("No moves left! Initiate the fight."),
+    write('No moves left! Initiate the fight.'),
     fail.
 
 /* Player's movement */
