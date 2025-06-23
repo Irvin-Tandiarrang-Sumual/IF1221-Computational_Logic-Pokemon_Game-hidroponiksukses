@@ -226,6 +226,8 @@ turn :-
                 ignore(addExp(Expgiven, Index1, Name))
             )
         ),
+        retractall(statusEfekKita(_, _)),
+        retractall(statusEfekLawan(_)),
         retractall(situation(_)),
         assertz(situation(win)), 
         retractall(statusKita(_,_,_,_,_,_,_,_)),
