@@ -126,6 +126,7 @@ setParty(Inven, Party):-
     level(Leveli, Pokemoni, Inven, Counteri, 0),
     level(Levelp, Pokemonp, Party1, Counterp, 1),
     party(Party1,Pokemonp),
+    retract(item_inventory(Inven, pokeball(filled(Pokemoni)))),
 
     /* Ambil pokemon inven */
     retract(poke_stats(HPi, ATKi, DEFi, Pokemoni, Inven, 0)),
@@ -135,7 +136,8 @@ setParty(Inven, Party):-
     /* replace pokemon party ke inven */
     assertz(poke_stats(HPp, ATKp, DEFp, Pokemonp, Inven, 0)),
     assertz(curr_health(Inven, Pokemonp, CurrHpp, 0)),
-    assertz(level(Levelp, Pokemonp, Inven, Counterp, 0)),   
+    assertz(level(Levelp, Pokemonp, Inven, Counterp, 0)),
+    assertz(item_inventory(Inven, pokeball(filled(Pokemonp)))),   
 
     /* Ambil pokemon party */
     retract(poke_stats(HPp, ATKp, DEFp, Pokemonp, Party1, 1)),
@@ -144,7 +146,7 @@ setParty(Inven, Party):-
     retract(party(Party1,Pokemonp)),
 
     /* replace pokemon inven ke party */
-    assertz(poke_stats(HPi, ATKi, DEFp, Pokemoni, Party1, 1)),
+    assertz(poke_stats(HPi, ATKi, DEFi, Pokemoni, Party1, 1)),
     assertz(curr_health(Party1, Pokemoni, CurrHpi, 1)),
     assertz(level(Leveli, Pokemoni, Party1, Counteri, 1)),
     assertz(party(Party1,Pokemoni)).

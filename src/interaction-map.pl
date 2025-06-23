@@ -72,7 +72,7 @@ move(DX, DY) :-
 
 
 move(_, _) :-
-    remaining_moves(0),
+    remaining_moves(0), fight,
     write('No moves left! Initiate the fight.'),
     fail.
 

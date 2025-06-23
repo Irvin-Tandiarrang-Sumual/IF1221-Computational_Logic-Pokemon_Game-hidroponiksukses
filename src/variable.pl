@@ -47,7 +47,7 @@ base_stats(35, 15, 10, charmander).
 base_stats(40, 12, 15, squirtle).
 base_stats(35, 15, 10, charmeleon).
 base_stats(40, 12, 15, wartortle).
-base_stats(250, 300, 250, mewtwo).
+base_stats(250, 1, 250, mewtwo).
 
 /* level Pokemon */
 /* level(Level, Nama_pokemon, Slot_Inventory, EXP_Counter, Boolean_party) */
@@ -99,8 +99,8 @@ skills(quick_attack, normal, 30, none, 0).
 skills(rock_throw, rock, 50, none, 0).
 skills(rest, normal, 0, heal(1.0, 2), 1.0).
 skills(ice_shard, ice, 40, none, 0).
-skills(psychic_blast, psychic, 25, paralyze, 0.2).
-skills(mind_shock, psychic, 20, area, 1.0).
+skills(psychic_blast, psychic, 1, paralyze, 0.2).
+skills(mind_shock, psychic, 1, area, 1.0).
 
 /* special trait mewtwo dengan id 10*/
 /* immune_status(id pokemon) */
