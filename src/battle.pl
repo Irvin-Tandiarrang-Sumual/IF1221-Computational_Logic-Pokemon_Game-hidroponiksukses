@@ -674,6 +674,7 @@ predict_enemy_defend :-
     ).
 
 kalahkan_pokemon :-
+    handle_item_drop,
     party_slots_remaining(Remaining),
     statusLawan(_, HP, ATK, DEF, Pokemon, _, _),
     enemy_level(Level),

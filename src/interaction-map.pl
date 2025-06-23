@@ -76,6 +76,8 @@ move(_, _) :-
     write('No moves left! Initiate the fight.'),
     fail.
 
+fight:- remaining_moves(0), battle(legendary).
+
 /* Player's movement */
 moveUp :- \+ situation(ongoing), write('Kamu bergerak ke atas'), nl, move(-2,0), check_player_pokemon,!.
 moveLeft :- \+ situation(ongoing), write('Kamu bergerak ke kiri'), nl, move(0,-2), check_player_pokemon,!.
