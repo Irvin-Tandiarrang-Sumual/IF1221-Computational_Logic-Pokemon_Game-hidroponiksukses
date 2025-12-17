@@ -1,4 +1,4 @@
-"# Pokemon Game - Logika Komputasional (IF1221)
+# Pokemon Game - Logika Komputasional (IF1221)
 
 Game berbasis Prolog yang menampilkan petualangan Pokemon dengan sistem pertarungan turn-based, inventory, eksplorasi peta 8x8, dan melawan boss legendaris Mewtwo!
 
